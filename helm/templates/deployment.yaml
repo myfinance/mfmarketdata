@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.mfmarketdata.mf_name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.mfmarketdata.mf_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.mfmarketdata.mf_name }}
+    spec:
+      containers:
+        - name: {{ .Values.mfmarketdata.mf_name }}
+          image: "{{ .Values.image.repository }}mfmarketdata:{{ .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}      
+          tty: true
+          env:
+            - name: "SPRING_PROFILES_ACTIVE"
+              value: "k8n"
+            - name: "api.common.version"
+              value: "{{ .Chart.AppVersion }}"

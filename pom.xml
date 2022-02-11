@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>de.hf.myfinance.mfmarketdata</groupId>
+    <artifactId>mfmarketdata</artifactId>
+    <version>0.0.0-0-SNAPSHOT</version>
+    <name>MFMarketData</name>
+    <parent>
+		<groupId>de.hf.myfinance</groupId>
+		<artifactId>root</artifactId>
+		<version>0.21.0-alpha.29</version>
+		<relativePath/> 
+	</parent>
+    <properties>
+        <NEXUS_URL>192.168.100.73:31001</NEXUS_URL>
+        <MFFrameWork.Version>0.21.0-alpha.29</MFFrameWork.Version>
+    </properties>
+
+	<dependencies>
+        <!--<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>-->
+        <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+        <!--<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>-->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-webflux-ui</artifactId>
+            <version>${springdoc.version}</version>
+        </dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+        <!--<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+		</dependency>-->
+
+        <dependency>
+			<groupId>de.hf.myfinance</groupId>
+			<artifactId>mfframework</artifactId>
+            <version>${MFFrameWork.Version}</version>
+		</dependency>
+
+        <dependency>
+			<groupId>de.hf.myfinance</groupId>
+			<artifactId>mfapi</artifactId>
+            <version>${MFFrameWork.Version}</version>
+		</dependency>
+
+	</dependencies>
+
+    <build>
+        <plugins>
+        	<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
+                <configuration>
+                <from>
+                    <image>${jib.baseimage}</image>
+                </from>
+                <to>
+                    <image>${jib.image-tag}</image>
+                </to>
+                <container>
+                    <mainClass>de.hf.myfinance.marketdata.MarketDataServiceApplication</mainClass>
+                </container>
+                <allowInsecureRegistries>true</allowInsecureRegistries>
+                </configuration>
+            </plugin>            
+        </plugins>
+    </build>
+
+    <repositories>
+     <repository>
+      <id>mynexus-release</id>
+      <name>mynexus release</name>
+      <url>http://192.168.100.73:31001/repository/maven-releases/</url>
+      <releases>
+       <enabled>true</enabled>
+      </releases>
+      <snapshots>
+       <enabled>false</enabled>
+      </snapshots>
+     </repository>     
+   </repositories>  
+
+</project>

@@ -1,0 +1,27 @@
+server.port: 7004
+logging:
+  level:
+    root: INFO
+    de.hf.myfinance: DEBUG
+
+springdoc:
+  swagger-ui.path: /openapi/swagger-ui.html
+  api-docs.path: /openapi/v3/api-docs
+  packagesToScan: de.hf.myfinance.marketdata.api
+  pathsToMatch: /**
+
+api:
+
+  common:
+    version: 1.0.0
+    title: MF marketdata API
+    description: REST API for price informations and marketdata of instruments.
+
+  responseCodes:
+    ok.description: OK
+    badRequest.description: Bad Request, invalid format of the request. See response message for more information
+    notFound.description: Not found, the specified id does not exist
+    unprocessableEntity.description: Unprocessable entity, input parameters caused the processing to fail. See response message for more information
+
+
+
