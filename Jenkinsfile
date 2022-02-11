@@ -65,7 +65,7 @@ pipeline {
        //sh 'kubectl delete job.batch/mfupgrade'
        //sh 'envsubst < deploy.yaml | kubectl apply -f -'
        sh 'envsubst < ./helm/Chart_template.yaml > ./helm/Chart.yaml'
-       sh 'helm install ${SERVICE_NAME} ./helm/  -n ${DEV_NAMESPACE} --set stage=dev --set ${SERVICE_NAME}.mf_http_port_ext=${DEV_PORT} --set repository=${DOCKER_REPO}${DOCKERHUB_USER}/${ORGANIZATION_NAME}-'
+       sh 'helm upgrade -i ${SERVICE_NAME} ./helm/  -n ${DEV_NAMESPACE} --set stage=dev --set ${SERVICE_NAME}.mf_http_port_ext=${DEV_PORT} --set repository=${DOCKER_REPO}${DOCKERHUB_USER}/${ORGANIZATION_NAME}-'
        //sh 'helm upgrade -i --cleanup-on-fail ${SERVICE_NAME} ./helm/  -n ${TEST_NAMESPACE} --set stage=test --set ${SERVICE_NAME}.mf_http_port_ext=${TEST_PORT} --set repository=${DOCKER_REPO}${DOCKERHUB_USER}/${ORGANIZATION_NAME}-'
        sh 'helm package helm -u -d helmcharts/'
        sh 'curl ${TARGET_HELM_REPO} --upload-file helmcharts/${SERVICE_NAME}-${VERSION}.tgz -v'
