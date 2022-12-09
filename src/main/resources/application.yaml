@@ -7,8 +7,72 @@ logging:
 springdoc:
   swagger-ui.path: /openapi/swagger-ui.html
   api-docs.path: /openapi/v3/api-docs
-  packagesToScan: de.hf.myfinance.marketdata.api
+  packagesToScan: de.hf.myfinance
   pathsToMatch: /**
+
+
+spring:
+  cloud:
+    function:
+      definition: saveInstrumentProcessor;saveTransactionProcessor;validateTransactionProcessor
+
+spring.cloud.stream:
+  defaultBinder: rabbit
+  default.contentType: application/json
+  bindings.saveInstrumentProcessor-in-0:
+    destination: instrumentApproved
+    group: instruments4marketdataGroup
+  bindings.loadNewMarketDataProcessor-in-0:
+    destination: loadNewMarketDataRequest
+    group: loadNewMarketDataGroup
+  bindings.savePricesProcessor-in-0:
+    destination: savePrices
+    group: savePricesGroup
+  bindings.pricesupdated-out-0:
+    destination: pricesupdated
+    producer:
+      required-groups: pricesupdatedAuditGroup
+
+spring.cloud.stream.bindings.saveInstrumentProcessor-in-0.consumer:
+  maxAttempts: 3
+  backOffInitialInterval: 500
+  backOffMaxInterval: 1000
+  backOffMultiplier: 2.0
+spring.cloud.stream.bindings.savePricesProcessor-in-0.consumer:
+  maxAttempts: 3
+  backOffInitialInterval: 500
+  backOffMaxInterval: 1000
+  backOffMultiplier: 2.0
+spring.cloud.stream.bindings.loadNewMarketDataProcessor-in-0.consumer:
+  maxAttempts: 3
+  backOffInitialInterval: 500
+  backOffMaxInterval: 1000
+  backOffMultiplier: 2.0
+
+spring.cloud.stream.rabbit.bindings:
+  saveInstrumentProcessor-in-0:
+    autoBindDlq: true
+    republishToDlq: true
+  savePricesProcessor-in-0:
+    autoBindDlq: true
+    republishToDlq: true
+  loadNewMarketDataProcessor-in-0:
+    autoBindDlq: true
+    republishToDlq: true
+
+spring.rabbitmq:
+  host: 192.168.100.73
+  port: 30021
+  username: user
+  password: vulkan
+
+spring.data.mongodb:
+  host: 192.168.100.73
+  port: 30023
+  database: marketdata-db
+  authentication-database: admin
+  username: root
+  password: vulkan
 
 api:
 
@@ -22,6 +86,12 @@ api:
     badRequest.description: Bad Request, invalid format of the request. See response message for more information
     notFound.description: Not found, the specified id does not exist
     unprocessableEntity.description: Unprocessable entity, input parameters caused the processing to fail. See response message for more information
+
+
+marketdata:
+  webrequest:
+    useproxy: false
+    timeout: 10000
 
 
 
