@@ -42,6 +42,14 @@ public class DataReaderImpl implements DataReader{
     }
 
     @Override
+    public Flux<Instrument> findActiveInstruments() {
+        return instrumentRepository.findByActive(true)
+                .map(e->
+                        instrumentMapper.entityToApi(e)
+                );
+    }
+
+    @Override
     public Mono<EndOfDayPrices> findPrices4Instrument(String instrumentBusinesskey) {
         return endOfDayPricesRepository.findByInstrumentBusinesskey(instrumentBusinesskey)
                 .map(e->

@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 
 public interface InstrumentRepository extends ReactiveCrudRepository<InstrumentEntity, String> {
     Mono<InstrumentEntity> findByBusinesskey(String businesskey);
+    Flux<InstrumentEntity> findByActive(Boolean active);
     Flux<InstrumentEntity> findByBusinesskeyIn(Iterable<String> businesskeyIterable);
     Mono<Long> deleteByBusinesskey(String businesskey);
 }

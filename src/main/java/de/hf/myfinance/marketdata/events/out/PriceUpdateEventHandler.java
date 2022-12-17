@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 import static de.hf.myfinance.event.Event.Type.CREATE;
 
 @Component
-public class EventHandler {
+public class PriceUpdateEventHandler {
 
     private final StreamBridge streamBridge;
 
-    public EventHandler(StreamBridge streamBridge){
+    public PriceUpdateEventHandler(StreamBridge streamBridge){
         this.streamBridge = streamBridge;
     }
 

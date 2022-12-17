@@ -12,5 +12,6 @@ import java.time.LocalDate;
 public interface DataReader {
     Flux<Instrument> findInstrumentByBusinesskeyIn(Iterable<String> businesskeyIterable);
     Flux<Instrument> findAllInstruments();
+    Flux<Instrument> findActiveInstruments();
     Mono<EndOfDayPrices> findPrices4Instrument(String instrumentBusinesskey);
 }

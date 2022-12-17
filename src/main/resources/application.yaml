@@ -14,7 +14,7 @@ springdoc:
 spring:
   cloud:
     function:
-      definition: saveInstrumentProcessor;saveTransactionProcessor;validateTransactionProcessor
+      definition: saveInstrumentProcessor;loadNewMarketDataProcessor;saveEndOfDayPriceProcessor
 
 spring.cloud.stream:
   defaultBinder: rabbit
@@ -25,13 +25,17 @@ spring.cloud.stream:
   bindings.loadNewMarketDataProcessor-in-0:
     destination: loadNewMarketDataRequest
     group: loadNewMarketDataGroup
-  bindings.savePricesProcessor-in-0:
-    destination: savePrices
+  bindings.saveEndOfDayPriceProcessor-in-0:
+    destination: pricesupdated
     group: savePricesGroup
   bindings.pricesupdated-out-0:
     destination: pricesupdated
     producer:
       required-groups: pricesupdatedAuditGroup
+  bindings.loadNewMarketData-out-0:
+    destination: loadNewMarketDataRequest
+    producer:
+      required-groups: loadNewMarketDataAuditGroup
 
 spring.cloud.stream.bindings.saveInstrumentProcessor-in-0.consumer:
   maxAttempts: 3

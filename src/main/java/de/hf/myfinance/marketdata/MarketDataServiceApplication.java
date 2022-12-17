@@ -22,6 +22,8 @@ import org.springframework.data.mongodb.core.index.ReactiveIndexOperations;
 import org.springframework.data.mongodb.core.mapping.MongoPersistentEntity;
 import org.springframework.data.mongodb.core.mapping.MongoPersistentProperty;
 import org.springframework.web.client.RestTemplate;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 @SpringBootApplication
 @ComponentScan("de.hf")
@@ -30,6 +32,8 @@ public class MarketDataServiceApplication {
 	@Value("${api.common.version}")         String apiVersion;
 	@Value("${api.common.title}")           String apiTitle;
 	@Value("${api.common.description}")     String apiDescription;
+	@Value("${app.threadPoolSize:10}")      Integer threadPoolSize;
+	@Value("${app.taskQueueSize:100}")      Integer taskQueueSize;
 
 	private static final Logger LOG = LoggerFactory.getLogger(MarketDataServiceApplication.class);
 
@@ -44,6 +48,11 @@ public class MarketDataServiceApplication {
 				.info(new Info().title(apiTitle)
 						.description(apiDescription)
 						.version(apiVersion));
+	}
+
+	@Bean
+	public Scheduler publishEventScheduler() {
+		return Schedulers.newBoundedElastic(threadPoolSize, taskQueueSize, "publish-pool");
 	}
 
 	public static void main(String[] args) {

@@ -1,6 +1,6 @@
 package de.hf.myfinance.marketdata.service;
 
-import de.hf.myfinance.marketdata.events.out.EventHandler;
+import de.hf.myfinance.marketdata.events.out.PriceUpdateEventHandler;
 import de.hf.myfinance.marketdata.importhandler.ImportHandler;
 import de.hf.myfinance.marketdata.persistence.DataReader;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
@@ -14,17 +14,32 @@ import reactor.core.publisher.Mono;
 public class MarketDataService {
     private final DataReader dataReader;
     private final ImportHandler importhandler;
-    private final EventHandler eventHandler;
+    private final PriceUpdateEventHandler eventHandler;
 
     @Autowired
-    public MarketDataService(DataReader dataReader, ImportHandler importhandler, EventHandler eventHandler) {
+    public MarketDataService(DataReader dataReader, ImportHandler importhandler, PriceUpdateEventHandler eventHandler) {
         this.dataReader = dataReader;
         this.importhandler = importhandler;
         this.eventHandler = eventHandler;
     }
 
+    public Mono<Void> savePrices(EndOfDayPrices endOfDayPrices){
+        return dataReader.findPrices4Instrument(endOfDayPrices.getInstrumentBusinesskey())
+                .switchIfEmpty(Mono.just(new EndOfDayPrices(endOfDayPrices.getInstrumentBusinesskey())))
+                .flatMap(p->{
+                    var oldPrices = p.getPrices();
+                    oldPrices.putAll(endOfDayPrices.getPrices());
+                    p.setPrices(oldPrices);
+                    return Mono.just(p);
+                })
+                .flatMap(p->{
+                    eventHandler.sendPricesUpdatedEvent(p);
+                    return Mono.just("").then();
+                });
+    }
+
     public Flux<Void> importData(){
-        return dataReader.findAllInstruments()
+        return dataReader.findActiveInstruments()
                 .flatMap(i->importPrices4Instrument(i));
     }
 
@@ -41,5 +56,9 @@ public class MarketDataService {
                     eventHandler.sendPricesUpdatedEvent(p);
                     return Mono.just("").then();
                 });
+    }
+
+    public Mono<EndOfDayPrices> getEndOfDayPrices(String businesskey) {
+        return dataReader.findPrices4Instrument(businesskey);
     }
 }
