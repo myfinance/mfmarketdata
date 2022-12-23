@@ -21,7 +21,7 @@ public class SaveEndOfDayPriceProcessorTest extends EventProcessorTestBase{
     protected Consumer<Event<String, EndOfDayPrices>> saveEndOfDayPriceProcessor;
 
     @Test
-    void createTenant() {
+    void saveEquityPrices() {
         var prices = new EndOfDayPrices();
         prices.setInstrumentBusinesskey("testkey");
         var pricemap = new HashMap<LocalDate, EndOfDayPrice>();
