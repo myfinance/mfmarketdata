@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class AlphavantageHandler implements ImportHandler {
@@ -62,19 +63,24 @@ public class AlphavantageHandler implements ImportHandler {
         Map<LocalDate, Double> prices = new HashMap<>();
         Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
         Map<String, Object> timeSeries = (Map<String, Object>)map.get(timeSeriesName);
-        for (String dateString: timeSeries.keySet() ) {
-            try{
-                LocalDate date = LocalDate.parse(dateString);
-                String valueString = ((Map<String, String>)timeSeries.get(dateString)).get("4. close");
-                Double value = Double.parseDouble(valueString);
-
-                prices.put(date, value);
-
-            } catch(Exception e){
-                auditService.saveMessage("can not parse value for date"+dateString+ " and url " + url, Severity.ERROR, AUDIT_MSG_TYPE);
-                continue;
+        if(timeSeries==null){
+            auditService.saveMessage("invalid request or no data for url " + url, Severity.ERROR, AUDIT_MSG_TYPE);
+            if(map !=null && map.containsKey("Error Message")){
+                auditService.saveMessage("Alphavantage report an error: " + map.get("Error Message"), Severity.ERROR, AUDIT_MSG_TYPE);
             }
+        } else {
+            for (String dateString: timeSeries.keySet() ) {
+                try {
+                    LocalDate date = LocalDate.parse(dateString);
+                    String valueString = ((Map<String, String>) timeSeries.get(dateString)).get("4. close");
+                    Double value = Double.parseDouble(valueString);
 
+                    prices.put(date, value);
+
+                } catch (Exception e) {
+                    auditService.saveMessage("can not parse value for date" + dateString + " and url " + url, Severity.ERROR, AUDIT_MSG_TYPE);
+                }
+            }
         }
         return prices;
     }
