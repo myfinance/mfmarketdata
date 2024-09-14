@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 @Component
 public class AlphavantageHandler implements ImportHandler {

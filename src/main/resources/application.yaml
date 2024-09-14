@@ -23,7 +23,7 @@ spring.cloud.stream:
     destination: instrumentApproved
     group: instruments4marketdataGroup
   bindings.loadNewMarketDataProcessor-in-0:
-    destination: loadNewMarketDataRequest
+    destination: loadNewMarketData
     group: loadNewMarketDataGroup
   bindings.saveEndOfDayPriceProcessor-in-0:
     destination: pricesupdated
