@@ -15,7 +15,7 @@ import de.hf.framework.utils.ServiceUtil;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
-import static de.hf.myfinance.event.Event.Type.START;
+import static de.hf.myfinance.event.Event.Type.*;
 
 @RestController
 public class MarketDataApiImpl implements MarketDataApi {
@@ -47,14 +47,20 @@ public class MarketDataApiImpl implements MarketDataApi {
         }).subscribeOn(publishEventScheduler);
     }
 
-    @Override
-    public Mono<Void> savePrices(EndOfDayPrices endOfDayPrices) {
-        return marketDataService.savePrices(endOfDayPrices);
-    }
 
     @Override
     public Mono<EndOfDayPrices> getEndOfDayPrices(String businesskey) {
         return marketDataService.getEndOfDayPrices(businesskey);
+    }
+
+        @Override
+    public Mono<String> validatePrices(EndOfDayPrices endOfDayPrices){
+        return Mono.fromCallable(() -> {
+
+            sendMessage("validateSinglePriceRequest-out-0",
+                    new Event<>(CREATE, endOfDayPrices.getInstrumentBusinesskey(), endOfDayPrices));
+            return "{\"success\": \"price validation started for instrument:"+endOfDayPrices.getInstrumentBusinesskey() +" \"}";
+        }).subscribeOn(publishEventScheduler);
     }
 
     /**

@@ -1,6 +1,7 @@
 package de.hf.myfinance.marketdata.events.out;
 
 import de.hf.myfinance.event.Event;
+import de.hf.myfinance.restmodel.EndOfDayPrice;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;

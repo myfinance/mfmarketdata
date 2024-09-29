@@ -36,6 +36,14 @@ spring.cloud.stream:
     destination: loadNewMarketDataRequest
     producer:
       required-groups: loadNewMarketDataAuditGroup
+  bindings.validateSinglePriceProcessor-in-0:
+    destination: validateSinglePriceRequest
+    group: validateSinglePriceGroup      
+  bindings.validateSinglePriceRequest-out-0:
+    destination: validateSinglePriceRequest
+    producer:
+      required-groups: validateSinglePriceAuditGroup 
+       
 
 spring.cloud.stream.bindings.saveInstrumentProcessor-in-0.consumer:
   maxAttempts: 3
@@ -53,16 +61,6 @@ spring.cloud.stream.bindings.loadNewMarketDataProcessor-in-0.consumer:
   backOffMaxInterval: 1000
   backOffMultiplier: 2.0
 
-spring.cloud.stream.rabbit.bindings:
-  saveInstrumentProcessor-in-0:
-    autoBindDlq: true
-    republishToDlq: true
-  savePricesProcessor-in-0:
-    autoBindDlq: true
-    republishToDlq: true
-  loadNewMarketDataProcessor-in-0:
-    autoBindDlq: true
-    republishToDlq: true
 
 spring.rabbitmq:
   host: 192.168.100.73

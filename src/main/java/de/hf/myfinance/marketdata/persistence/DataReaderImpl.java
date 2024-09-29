@@ -56,4 +56,9 @@ public class DataReaderImpl implements DataReader{
                         endOfDayPricesMapper.entityToApi(e)
                 );
     }
+
+    @Override
+    public Mono<Instrument> findByBusinesskey(String businesskey) {
+        return instrumentRepository.findByBusinesskey(businesskey).map(e-> instrumentMapper.entityToApi(e));
+    }
 }
