@@ -14,7 +14,7 @@ springdoc:
 spring:
   cloud:
     function:
-      definition: saveInstrumentProcessor;loadNewMarketDataProcessor;saveEndOfDayPriceProcessor
+      definition: saveInstrumentProcessor;loadNewMarketDataProcessor;saveEndOfDayPriceProcessor;validateSinglePriceProcessor
 
 spring.cloud.stream:
   defaultBinder: rabbit

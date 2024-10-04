@@ -1,12 +1,9 @@
 package de.hf.myfinance.marketdata;
 
 import de.hf.myfinance.event.Event;
-import de.hf.myfinance.marketdata.importhandler.ImportHandler;
-import de.hf.myfinance.marketdata.persistence.InstrumentMapper;
 import de.hf.myfinance.marketdata.persistence.entities.InstrumentEntity;
 import de.hf.myfinance.marketdata.persistence.repositories.InstrumentRepository;
 import de.hf.myfinance.marketdata.service.MarketDataService;
-import de.hf.myfinance.marketdata.webtools.WebRequest;
 import de.hf.myfinance.restmodel.*;
 import de.hf.testhelper.JsonHelper;
 import org.junit.jupiter.api.Test;
