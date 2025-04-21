@@ -1,12 +1,15 @@
 package de.hf.myfinance.marketdata.events.in;
 
 import de.hf.framework.audit.AuditService;
+import de.hf.framework.audit.AuditType;
 import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.marketdata.persistence.EndOfDayPricesMapper;
+import de.hf.myfinance.marketdata.persistence.entities.EndOfDayPricesEntity;
 import de.hf.myfinance.marketdata.persistence.repositories.EndOfDayPricesRepository;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
-import org.springframework.beans.factory.annotation.Autowired;
+import reactor.core.publisher.Mono;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,7 +22,6 @@ public class SaveEndOfDayPriceProcessorConfig {
     private final EndOfDayPricesRepository endOfDayPricesRepository;
     protected static final String AUDIT_MSG_TYPE="SaveEndOfDayPriceProcessorConfig_Event";
 
-    @Autowired
     public SaveEndOfDayPriceProcessorConfig(EndOfDayPricesMapper endOfDayPricesMapper, EndOfDayPricesRepository endOfDayPricesRepository, AuditService auditService) {
         this.endOfDayPricesMapper = endOfDayPricesMapper;
         this.endOfDayPricesRepository = endOfDayPricesRepository;
@@ -38,7 +40,10 @@ public class SaveEndOfDayPriceProcessorConfig {
                     auditService.saveMessage("Create EndOfDayPrices for Instrument: "+ endOfDayPrices.getInstrumentBusinesskey(), Severity.INFO, AUDIT_MSG_TYPE);
                     var endOfDayPricesEntity = endOfDayPricesMapper.apiToEntity(endOfDayPrices);
                     endOfDayPricesRepository.deleteByInstrumentBusinesskey(endOfDayPricesEntity.getInstrumentBusinesskey())
-                            .then(endOfDayPricesRepository.save(endOfDayPricesEntity)).block();
+                            .then(endOfDayPricesRepository
+                            .save(endOfDayPricesEntity))
+                            .flatMap(this::logEvent)
+                            .block();
                     break;
 
                 default:
@@ -49,5 +54,11 @@ public class SaveEndOfDayPriceProcessorConfig {
             auditService.saveMessage("Message processing done!", Severity.INFO, AUDIT_MSG_TYPE);
 
         };
+    }
+
+    private Mono<EndOfDayPricesEntity> logEvent(EndOfDayPricesEntity pricesObject){
+        auditService.saveMessage("Prices saved:businesskey=" + pricesObject.getInstrumentBusinesskey(), 
+            Severity.INFO, AUDIT_MSG_TYPE, "NA", AuditType.PRICECHANGEDEVENT);
+        return Mono.just(pricesObject);
     }
 }

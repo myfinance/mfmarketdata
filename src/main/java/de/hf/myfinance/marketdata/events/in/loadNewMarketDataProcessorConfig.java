@@ -23,14 +23,20 @@ public class loadNewMarketDataProcessorConfig {
     }
 
     @Bean
-    public Consumer<Event<String, Instrument>> loadNewMarketDataProcessor() {
+    public Consumer<Event<String, String>> loadNewMarketDataProcessor() {
         return event -> {
             auditService.saveMessage("Process message created at "+ event.getEventCreatedAt(), Severity.INFO, AUDIT_MSG_TYPE);
 
             switch (event.getEventType()) {
 
                 case START:
-                    marketDataService.importData().collectList().block();
+                    var data = event.getData();
+                    if(data==null || data.equals("all")){
+                        marketDataService.importData().collectList().block();
+                    }
+                    else {
+                        marketDataService.importData4Instrument(data).block();
+                    }
                     break;
 
                 default:

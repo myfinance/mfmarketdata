@@ -54,6 +54,11 @@ public class MarketDataService {
             .flatMap(i->importPrices4Instrument(i));
     }
 
+    public Mono<Void> importData4Instrument(String businesskey) {
+        return dataReader.findByBusinesskey(businesskey)
+            .flatMap(i->importPrices4Instrument(i));
+    }
+
     private Mono<Void> importPrices4Instrument(Instrument instrument) {
         return dataReader.findPrices4Instrument(instrument.getBusinesskey())
                 .switchIfEmpty(Mono.just(new EndOfDayPrices(instrument.getBusinesskey())))
