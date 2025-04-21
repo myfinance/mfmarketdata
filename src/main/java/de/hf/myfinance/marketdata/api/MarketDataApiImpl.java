@@ -24,7 +24,6 @@ public class MarketDataApiImpl implements MarketDataApi {
     private final Scheduler publishEventScheduler;
     private final MarketDataService marketDataService;
 
-    @Autowired
     public MarketDataApiImpl(ServiceUtil serviceUtil, StreamBridge streamBridge, MarketDataService marketDataService, @Qualifier("publishEventScheduler") Scheduler publishEventScheduler) {
         this.serviceUtil = serviceUtil;
         this.streamBridge = streamBridge;

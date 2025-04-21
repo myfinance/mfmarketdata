@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Document(collection = "prices")
@@ -19,6 +20,7 @@ public class EndOfDayPricesEntity {
     @Indexed(unique = true)
     private String instrumentBusinesskey;
     private Map<LocalDate, EndOfDayPrice> prices;
+    private LocalDateTime lastUpdateTs;
 
     public String getInstrumentBusinesskey() {
         return instrumentBusinesskey;
@@ -39,5 +41,13 @@ public class EndOfDayPricesEntity {
     }
     public void setPriceid(String priceid) {
         this.priceid = priceid;
+    }
+
+    public LocalDateTime getLastUpdateTs() {
+        return this.lastUpdateTs;
+    }
+
+    public void setLastUpdateTs(LocalDateTime lastUpdateTs) {
+        this.lastUpdateTs = lastUpdateTs;
     }
 }

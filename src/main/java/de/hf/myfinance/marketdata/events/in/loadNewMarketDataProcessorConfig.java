@@ -5,7 +5,6 @@ import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.marketdata.service.MarketDataService;
 import de.hf.myfinance.restmodel.Instrument;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,7 +17,6 @@ public class loadNewMarketDataProcessorConfig {
     private final AuditService auditService;
     protected static final String AUDIT_MSG_TYPE="loadNewMarketDataProcessorConfig_Event";
 
-    @Autowired
     public loadNewMarketDataProcessorConfig(MarketDataService marketDataService, AuditService auditService) {
         this.marketDataService = marketDataService;
         this.auditService = auditService;

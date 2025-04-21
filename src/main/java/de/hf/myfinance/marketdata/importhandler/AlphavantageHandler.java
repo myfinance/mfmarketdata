@@ -2,16 +2,26 @@ package de.hf.myfinance.marketdata.importhandler;
 
 import de.hf.framework.audit.AuditService;
 import de.hf.framework.audit.Severity;
+import de.hf.myfinance.marketdata.persistence.DataReaderImpl;
+import de.hf.myfinance.marketdata.persistence.KeyTsProjection;
 import de.hf.myfinance.marketdata.webtools.WebRequest;
 import de.hf.myfinance.restmodel.*;
+import reactor.core.publisher.Mono;
+
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class AlphavantageHandler implements ImportHandler {
+
+    private final DataReaderImpl dataReaderImpl;
 
     WebRequest webRequest;
     AuditService auditService;
@@ -24,9 +34,10 @@ public class AlphavantageHandler implements ImportHandler {
     protected static final String AUDIT_MSG_TYPE="AlphavantageHandler_Event";
 
 
-    public AlphavantageHandler(WebRequest webRequest, AuditService auditService){
+    public AlphavantageHandler(WebRequest webRequest, AuditService auditService, DataReaderImpl dataReaderImpl){
         this.webRequest=webRequest;
         this.auditService=auditService;
+        this.dataReaderImpl = dataReaderImpl;
     }
 
     public Map<LocalDate, EndOfDayPrice> importPrices(Instrument security){
@@ -34,12 +45,14 @@ public class AlphavantageHandler implements ImportHandler {
         InstrumentType securityType = security.getInstrumentType();
         if(securityType.equals(InstrumentType.EQUITY)) {
             var symbols = security.getAdditionalMaps().get(AdditionalMaps.EQUITYSYMBOLS);
-            symbols.keySet().forEach(s->{
-                String url = EQ_URLPREFIX+s+EQ_URLPOSTFIX;
-                var currency = symbols.get(s);
-                var prices = getTimeSeries(security, "Weekly Time Series", url);
-                add2Pricemap(values, currency, prices);
-            });
+            if(symbols!=null && !symbols.isEmpty()){
+                symbols.keySet().forEach(s->{
+                    String url = EQ_URLPREFIX+s+EQ_URLPOSTFIX;
+                    var currency = symbols.get(s);
+                    var prices = getTimeSeries(security, "Weekly Time Series", url);
+                    add2Pricemap(values, currency, prices);
+                });
+            }
         }else if(securityType.equals(InstrumentType.CURRENCY)) {
             String currencyCode = security.getAdditionalProperties().get(AdditionalProperties.CURRENCYCODE);
             String url = FX_URLPREFIX+currencyCode+FX_URLPOSTFIX;
@@ -84,6 +97,37 @@ public class AlphavantageHandler implements ImportHandler {
         return prices;
     }
 
+    @Override
+    public Mono<List<Instrument>> filterInstruments(List<Instrument> instruments) {
+        List<Instrument> relevantInstruments = instruments.stream()
+            .filter(i->i.getInstrumentType().equals(InstrumentType.CURRENCY)
+                || (i.getAdditionalMaps()!=null &&
+                i.getAdditionalMaps().get(AdditionalMaps.EQUITYSYMBOLS)!=null))
+            .collect(Collectors.toList());
+
+
+        return dataReaderImpl.getKeyToTsMap()
+            .collectMap(KeyTsProjection::getInstrumentBusinesskey, KeyTsProjection::getLastUpdateTs)
+            .map(keyTsMap -> {
+                // 1. Instruments NOT in KeyTsProjection
+                List<Instrument> nonMatching = relevantInstruments.stream()
+                    .filter(instr -> !keyTsMap.containsKey(instr.getBusinesskey()))
+                    .limit(5)
+                    .collect(Collectors.toList());
+    
+                // 2. Instruments that ARE in KeyTsProjection
+                List<Instrument> matchingSortedByOldestTs = relevantInstruments.stream()
+                    .filter(instr -> keyTsMap.containsKey(instr.getBusinesskey()))
+                    .sorted(Comparator.comparing(instr -> keyTsMap.get(instr.getBusinesskey())))
+                    .limit(5)
+                    .collect(Collectors.toList());
+    
+                // 3. Combine results
+                List<Instrument> combined = new ArrayList<>(nonMatching);
+                combined.addAll(matchingSortedByOldestTs);
+                return combined;
+            });
+    }
 
 
 }

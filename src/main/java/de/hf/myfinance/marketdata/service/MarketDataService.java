@@ -8,7 +8,8 @@ import de.hf.myfinance.marketdata.persistence.DataReader;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.restmodel.Instrument;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,7 +23,6 @@ public class MarketDataService {
 
     protected static final String AUDIT_MSG_TYPE="MarketDataService_User_Event";
 
-    @Autowired
     public MarketDataService(DataReader dataReader, ImportHandler importhandler, PriceUpdateEventHandler eventHandler, AuditService auditService) {
         this.dataReader = dataReader;
         this.importhandler = importhandler;
@@ -48,7 +48,10 @@ public class MarketDataService {
 
     public Flux<Void> importData() {
         return dataReader.findActiveInstruments()
-                .flatMap(i -> importPrices4Instrument(i));
+            .collectList()
+            .flatMap(importhandler::filterInstruments)
+            .flatMapMany(Flux::fromIterable)
+            .flatMap(i->importPrices4Instrument(i));
     }
 
     private Mono<Void> importPrices4Instrument(Instrument instrument) {
@@ -61,7 +64,10 @@ public class MarketDataService {
                     return Mono.just(p);
                 })
                 .flatMap(p->{
-                    eventHandler.sendPricesUpdatedEvent(p);
+                    if(p!=null && p.getPrices()!=null && !p.getPrices().isEmpty()){
+                        p.setLastUpdateTs(LocalDateTime.now());
+                        eventHandler.sendPricesUpdatedEvent(p);
+                    }
                     return Mono.just("").then();
                 });
     }

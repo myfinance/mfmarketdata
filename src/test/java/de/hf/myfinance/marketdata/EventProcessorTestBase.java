@@ -1,11 +1,21 @@
 package de.hf.myfinance.marketdata;
 
+import de.hf.framework.audit.AuditService;
 import de.hf.myfinance.event.Event;
+import de.hf.myfinance.marketdata.events.out.PriceUpdateEventHandler;
+import de.hf.myfinance.marketdata.importhandler.AlphavantageHandler;
+import de.hf.myfinance.marketdata.importhandler.ImportHandler;
+import de.hf.myfinance.marketdata.persistence.DataReaderImpl;
 import de.hf.myfinance.marketdata.persistence.repositories.EndOfDayPricesRepository;
 import de.hf.myfinance.marketdata.persistence.repositories.InstrumentRepository;
+import de.hf.myfinance.marketdata.service.MarketDataService;
+import de.hf.myfinance.marketdata.webtools.WebRequest;
+import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.restmodel.Instrument;
 import de.hf.testhelper.MongoDbTestBase;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,12 +41,33 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     @Autowired
     EndOfDayPricesRepository endOfDayPricesRepository;
 
+
+
+    @Mock
+    WebRequest webRequest;
+
+    @Autowired
+    DataReaderImpl dataReaderImpl;
+
+    @Autowired 
+    AuditService auditService;
+
+    MarketDataService marketDataService;
+    ImportHandler importHandler;
+
     @Autowired
     private OutputDestination target;
 
     @Autowired
+    PriceUpdateEventHandler priceUpdateEventHandler;
+
+    @Autowired
     @Qualifier("saveInstrumentProcessor")
     protected Consumer<Event<String, Instrument>> saveInstrumentProcessor;
+
+    @Autowired
+    @Qualifier("saveEndOfDayPriceProcessor")
+    protected Consumer<Event<String, EndOfDayPrices>> saveEndOfDayPriceProcessor;
 
     String instrumentProcessorBindingName = "saveInstrumentProcessor-in-0";
     String endOfDayPriceProcessorBindingName = "savePricesProcessor-in-0";
@@ -44,6 +75,9 @@ public class EventProcessorTestBase extends MongoDbTestBase {
 
     @BeforeEach
     void setupDb() {
+        importHandler = new AlphavantageHandler(webRequest, auditService, dataReaderImpl);
+        marketDataService = new MarketDataService(dataReaderImpl, importHandler, priceUpdateEventHandler, auditService);
+
         instrumentRepository.deleteAll().block();
         endOfDayPricesRepository.deleteAll().block();
         purgeMessages(instrumentProcessorBindingName);

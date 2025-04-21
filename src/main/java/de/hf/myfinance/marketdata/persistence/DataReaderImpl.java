@@ -4,7 +4,12 @@ import de.hf.myfinance.marketdata.persistence.repositories.EndOfDayPricesReposit
 import de.hf.myfinance.marketdata.persistence.repositories.InstrumentRepository;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.restmodel.Instrument;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,7 +22,6 @@ public class DataReaderImpl implements DataReader{
     private final InstrumentMapper instrumentMapper;
     private final EndOfDayPricesMapper endOfDayPricesMapper;
 
-    @Autowired
     public DataReaderImpl(InstrumentRepository instrumentRepository, EndOfDayPricesRepository endOfDayPricesRepository, InstrumentMapper instrumentMapper, EndOfDayPricesMapper endOfDayPricesMapper) {
         this.instrumentRepository = instrumentRepository;
         this.endOfDayPricesRepository = endOfDayPricesRepository;
@@ -61,4 +65,10 @@ public class DataReaderImpl implements DataReader{
     public Mono<Instrument> findByBusinesskey(String businesskey) {
         return instrumentRepository.findByBusinesskey(businesskey).map(e-> instrumentMapper.entityToApi(e));
     }
+
+    @Override
+    public Flux<KeyTsProjection> getKeyToTsMap() {
+        return endOfDayPricesRepository.findAllBy();
+    }
+
 }
