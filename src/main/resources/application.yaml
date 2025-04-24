@@ -43,6 +43,10 @@ spring.cloud.stream:
     destination: validateSinglePriceRequest
     producer:
       required-groups: validateSinglePriceAuditGroup 
+  bindings.mflog-out-0:
+    destination: logStream
+    producer:
+      required-groups: mflogauditGroup
        
 
 spring.cloud.stream.bindings.saveInstrumentProcessor-in-0.consumer:

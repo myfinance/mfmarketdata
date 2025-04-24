@@ -2,7 +2,6 @@ package de.hf.myfinance.marketdata.events.in;
 
 import java.util.function.Consumer;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,7 +17,6 @@ public class ValidateSinglePriceProcessorConfig {
     private final MarketDataService marketDataService;
     protected static final String AUDIT_MSG_TYPE="ValidateSinglePriceProcessorConfig_Event";
 
-    @Autowired
     public ValidateSinglePriceProcessorConfig(AuditService auditService, MarketDataService marketDataService) {
         this.auditService = auditService;
         this.marketDataService=marketDataService;

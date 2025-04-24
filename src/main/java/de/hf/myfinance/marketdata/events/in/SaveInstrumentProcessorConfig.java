@@ -39,6 +39,8 @@ public class SaveInstrumentProcessorConfig {
                     if(instrument.getInstrumentType().equals(InstrumentType.CURRENCY) 
                         || instrument.getInstrumentType().equals(InstrumentType.EQUITY)
                         || instrument.getInstrumentType().equals(InstrumentType.ETF)
+                        || instrument.getInstrumentType().equals(InstrumentType.BOND)
+                        || instrument.getInstrumentType().equals(InstrumentType.INDEX)
                         || instrument.getInstrumentType().equals(InstrumentType.FONDS)){
                         var instrumentEntity = instrumentMapper.apiToEntity(instrument);
                         instrumentRepository.deleteByBusinesskey(instrumentEntity.getBusinesskey()).then(instrumentRepository.save(instrumentEntity)).block();
