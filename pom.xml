@@ -9,13 +9,13 @@
 		<groupId>de.hf.myfinance</groupId>
 		<artifactId>root</artifactId>
         <!--<version>0.0.0-0-SNAPSHOT</version>-->
-        <version>0.24.0-alpha-7a2b3c369e58402b8df2e3eb9aabe2f1c1d1b3c6</version>
+        <version>0.24.0-alpha-cb572e8acc28a3d406fe1705ad11d54eedac0f01</version>
 		<relativePath/> 
 	</parent>
     <properties>
         <NEXUS_URL>192.168.100.73:31001</NEXUS_URL>
         <!--<MFFrameWork.Version>0.0.0-0-SNAPSHOT</MFFrameWork.Version>-->
-        <MFFrameWork.Version>0.24.0-alpha-7a2b3c369e58402b8df2e3eb9aabe2f1c1d1b3c6</MFFrameWork.Version>
+        <MFFrameWork.Version>0.24.0-alpha-cb572e8acc28a3d406fe1705ad11d54eedac0f01</MFFrameWork.Version>
         <jib.container-name>holgerfischer/myfinance-mfmarketdata:</jib.container-name>
     </properties>
 
