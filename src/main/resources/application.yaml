@@ -31,22 +31,22 @@ spring.cloud.stream:
   bindings.pricesupdated-out-0:
     destination: pricesupdated
     producer:
-      required-groups: pricesupdatedAuditGroup
+      required-groups: savePricesGroup
   bindings.loadNewMarketData-out-0:
     destination: loadNewMarketDataRequest
     producer:
-      required-groups: loadNewMarketDataAuditGroup
+      required-groups: loadNewMarketDataGroup
   bindings.validateSinglePriceProcessor-in-0:
     destination: validateSinglePriceRequest
     group: validateSinglePriceGroup      
   bindings.validateSinglePriceRequest-out-0:
     destination: validateSinglePriceRequest
     producer:
-      required-groups: validateSinglePriceAuditGroup 
+      required-groups: validateSinglePriceGroup 
   bindings.mflog-out-0:
     destination: logStream
     producer:
-      required-groups: mflogauditGroup
+      required-groups: logPublisherGroup
        
 
 spring.cloud.stream.bindings.saveInstrumentProcessor-in-0.consumer:

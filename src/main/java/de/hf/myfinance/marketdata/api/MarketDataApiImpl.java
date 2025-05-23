@@ -4,7 +4,6 @@ import de.hf.myfinance.event.Event;
 import de.hf.myfinance.marketdata.service.MarketDataService;
 import de.hf.myfinance.restapi.MarketDataApi;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
