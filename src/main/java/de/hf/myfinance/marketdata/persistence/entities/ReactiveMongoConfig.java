@@ -1,4 +1,4 @@
-package de.hf.myfinance.marketdata;
+package de.hf.myfinance.marketdata.persistence.entities;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
