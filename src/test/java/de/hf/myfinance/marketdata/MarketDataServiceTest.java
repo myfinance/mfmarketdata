@@ -2,7 +2,6 @@ package de.hf.myfinance.marketdata;
 
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.marketdata.importhandler.AlphavantageHandler;
-import de.hf.myfinance.marketdata.persistence.KeyTsProjection;
 import de.hf.myfinance.marketdata.persistence.entities.EndOfDayPricesEntity;
 import de.hf.myfinance.marketdata.persistence.entities.InstrumentEntity;
 import de.hf.myfinance.restmodel.*;
@@ -77,7 +76,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
     }
 
     /**
-     * import prices for active instruments with symbol. if more then 10 then take instrument with no or oldest prices
+     * impoort prices for active instruments with symbol and take 5 instruments with no 5 with oldest prices
      */
     @Test
     void importPricesRuleTest() {
