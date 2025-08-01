@@ -3,6 +3,7 @@ package de.hf.myfinance.marketdata.service;
 import de.hf.framework.audit.AuditService;
 import de.hf.myfinance.exception.MFMsgKey;
 import de.hf.myfinance.marketdata.events.out.PriceUpdateEventHandler;
+import de.hf.myfinance.marketdata.events.out.SecurityMetricsImportedEventHandler;
 import de.hf.myfinance.marketdata.importhandler.ImportHandler;
 import de.hf.myfinance.marketdata.persistence.DataReader;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
@@ -18,15 +19,17 @@ import reactor.core.publisher.Mono;
 public class MarketDataService {
     private final DataReader dataReader;
     private final ImportHandler importhandler;
-    private final PriceUpdateEventHandler eventHandler;
+    private final PriceUpdateEventHandler priceUpdateEventHandler;
+    private final SecurityMetricsImportedEventHandler securityMetricsImportedEventHandler;
     protected final AuditService auditService;
 
     protected static final String AUDIT_MSG_TYPE="MarketDataService_User_Event";
 
-    public MarketDataService(DataReader dataReader, ImportHandler importhandler, PriceUpdateEventHandler eventHandler, AuditService auditService) {
+    public MarketDataService(DataReader dataReader, ImportHandler importhandler, PriceUpdateEventHandler priceUpdateEventHandler, SecurityMetricsImportedEventHandler securityMetricsImportedEventHandler, AuditService auditService) {
         this.dataReader = dataReader;
         this.importhandler = importhandler;
-        this.eventHandler = eventHandler;
+        this.priceUpdateEventHandler = priceUpdateEventHandler;
+        this.securityMetricsImportedEventHandler = securityMetricsImportedEventHandler;
         this.auditService = auditService;
     }
 
@@ -41,7 +44,7 @@ public class MarketDataService {
                 })
 
                 .flatMap(p -> {
-                    eventHandler.sendPricesUpdatedEvent(p);
+                    priceUpdateEventHandler.sendPricesUpdatedEvent(p);
                     return Mono.just("").then();
                 });
     }
@@ -49,7 +52,7 @@ public class MarketDataService {
     public Flux<Void> importData() {
         return dataReader.findActiveInstruments()
             .collectList()
-            .flatMap(importhandler::filterInstruments)
+            .flatMap(instrumentList->importhandler.filterInstruments(instrumentList, dataReader.getKeyToTsMap()))
             .flatMapMany(Flux::fromIterable)
             .flatMap(i->importPrices4Instrument(i));
     }
@@ -71,7 +74,7 @@ public class MarketDataService {
                 .flatMap(p->{
                     if(p!=null && p.getPrices()!=null && !p.getPrices().isEmpty()){
                         p.setLastUpdateTs(LocalDateTime.now());
-                        eventHandler.sendPricesUpdatedEvent(p);
+                        priceUpdateEventHandler.sendPricesUpdatedEvent(p);
                     }
                     return Mono.just("").then();
                 });
@@ -99,4 +102,27 @@ public class MarketDataService {
                     AUDIT_MSG_TYPE, MFMsgKey.UNKNOWN_INSTRUMENT_EXCEPTION).cast(Instrument.class);
 
     }
+
+    public Flux<Void> importSecurityMetrics() {
+        return dataReader.findActiveInstruments()
+            .collectList()
+            .flatMap(instrumentList->importhandler.filterInstruments(instrumentList, dataReader.getSecurityMetricsKeyToTsMap()))
+            .flatMapMany(Flux::fromIterable)
+            .flatMap(i->importSecurityMetrics4Instrument(i));
+    }
+
+    public Mono<Void> importSecurityMetrics4InstrumentKey(String businesskey) {
+        return dataReader.findByBusinesskey(businesskey)
+            .flatMap(i->importSecurityMetrics4Instrument(i));
+    }
+
+    private Mono<Void> importSecurityMetrics4Instrument(Instrument instrument) {
+        var securityMetrics = importhandler.importSecurityMetrics(instrument);
+        securityMetrics.setLastUpdateTs(LocalDateTime.now());
+        if(securityMetrics!=null){
+            securityMetricsImportedEventHandler.sendSecurityMetricsUpdatedEvent(securityMetrics);
+        }
+        return Mono.just("").then();
+    }
+
 }

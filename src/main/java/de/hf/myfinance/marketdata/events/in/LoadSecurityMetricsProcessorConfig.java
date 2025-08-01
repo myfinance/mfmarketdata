@@ -1,28 +1,28 @@
 package de.hf.myfinance.marketdata.events.in;
 
+import java.util.function.Consumer;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import de.hf.framework.audit.AuditService;
 import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.marketdata.service.MarketDataService;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import java.util.function.Consumer;
 
 @Configuration
-public class loadNewMarketDataProcessorConfig {
-
+public class LoadSecurityMetricsProcessorConfig {
+    
     private final MarketDataService marketDataService;
     private final AuditService auditService;
     protected static final String AUDIT_MSG_TYPE="loadNewMarketDataProcessorConfig_Event";
 
-    public loadNewMarketDataProcessorConfig(MarketDataService marketDataService, AuditService auditService) {
+    public LoadSecurityMetricsProcessorConfig(MarketDataService marketDataService, AuditService auditService) {
         this.marketDataService = marketDataService;
         this.auditService = auditService;
     }
 
     @Bean
-    public Consumer<Event<String, String>> loadNewMarketDataProcessor() {
+    public Consumer<Event<String, String>> loadSecurityMetricsProcessor() {
         return event -> {
             auditService.saveMessage("Process message created at "+ event.getEventCreatedAt(), Severity.INFO, AUDIT_MSG_TYPE);
 
@@ -31,10 +31,10 @@ public class loadNewMarketDataProcessorConfig {
                 case START:
                     var data = event.getData();
                     if(data==null || data.equals("all")){
-                        marketDataService.importData().collectList().block();
+                        marketDataService.importSecurityMetrics().collectList().block();
                     }
                     else {
-                        marketDataService.importData4Instrument(data).block();
+                        marketDataService.importSecurityMetrics4InstrumentKey(data).block();
                     }
                     break;
 

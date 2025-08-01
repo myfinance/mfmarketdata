@@ -6,6 +6,7 @@ import de.hf.myfinance.marketdata.persistence.DataReaderImpl;
 import de.hf.myfinance.marketdata.persistence.KeyTsProjection;
 import de.hf.myfinance.marketdata.webtools.WebRequest;
 import de.hf.myfinance.restmodel.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Component;
@@ -27,10 +28,23 @@ public class AlphavantageHandler implements ImportHandler {
     WebRequest webRequest;
     AuditService auditService;
 
-    public final static String EQ_URLPREFIX = "https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=";
-    public final static String EQ_URLPOSTFIX = "&apikey=Q6RLS6PGB55105EP";
-    public final static String FX_URLPREFIX = "https://www.alphavantage.co/query?function=FX_DAILY&from_symbol=";
-    public final static String FX_URLPOSTFIX = "&to_symbol=EUR&apikey=Q6RLS6PGB55105EP";
+    public final static String ALPHAVANTAGE_API_KEY = "Q6RLS6PGB55105EP"; // Replace with your actual API key
+    public final static String URLPREFIX = "https://www.alphavantage.co/query?function=";
+    public final static String SYMBOL_PREFIX = "&symbol=";
+
+    public final static String EQ_FUNCTION = "TIME_SERIES_WEEKLY";
+    public final static String EQ_URLPREFIX = URLPREFIX + EQ_FUNCTION + SYMBOL_PREFIX;
+    public final static String EQ_URLPOSTFIX = "&apikey=" + ALPHAVANTAGE_API_KEY;
+
+    public final static String FX_FUNCTION = "FX_DAILY";
+    public final static String FX_URLPREFIX = URLPREFIX+FX_FUNCTION+"&from_symbol=";
+    public final static String FX_URLPOSTFIX = "&to_symbol=EUR&apikey=" + ALPHAVANTAGE_API_KEY;
+
+    public final static String SECURITYMETRICS_OVERVIEW_FUNCTION = "OVERVIEW";
+    public final static String SECURITYMETRICS_OVERVIEW_URLPREFIX = URLPREFIX+SECURITYMETRICS_OVERVIEW_FUNCTION+SYMBOL_PREFIX;
+    public final static String SECURITYMETRICS_OVERVIEW_URLPOSTFIX = "&apikey=" + ALPHAVANTAGE_API_KEY;
+
+    private static final Integer NUMBER_OF_INSTRUMENT2IMPORT = 5;
 
     protected static final String AUDIT_MSG_TYPE = "AlphavantageHandler_Event";
 
@@ -49,14 +63,14 @@ public class AlphavantageHandler implements ImportHandler {
                 symbols.keySet().forEach(s -> {
                     String url = EQ_URLPREFIX + s + EQ_URLPOSTFIX;
                     var currency = symbols.get(s);
-                    var prices = getTimeSeries(security, "Weekly Time Series", url);
+                    var prices = getTimeSeries( "Weekly Time Series", url);
                     add2Pricemap(values, currency, prices);
                 });
             }
         } else if (securityType.equals(InstrumentType.CURRENCY)) {
             String currencyCode = security.getAdditionalProperties().get(AdditionalProperties.CURRENCYCODE);
             String url = FX_URLPREFIX + currencyCode + FX_URLPOSTFIX;
-            var prices = getTimeSeries(security, "Time Series FX (Daily)", url);
+            var prices = getTimeSeries( "Time Series FX (Daily)", url);
             add2Pricemap(values, Instrument.DEFAULTCURRENCY, prices);
         }
 
@@ -72,7 +86,7 @@ public class AlphavantageHandler implements ImportHandler {
         return values;
     }
 
-    private Map<LocalDate, Double> getTimeSeries(Instrument security, String timeSeriesName, String url) {
+    private Map<LocalDate, Double> getTimeSeries(String timeSeriesName, String url) {
         Map<LocalDate, Double> prices = new HashMap<>();
         Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
         Map<String, Object> timeSeries = (Map<String, Object>) map.get(timeSeriesName);
@@ -105,20 +119,20 @@ public class AlphavantageHandler implements ImportHandler {
      * filter active instruments with symbol and take 5 instruments with no 5 with
      * oldest prices
      */
-    public Mono<List<Instrument>> filterInstruments(List<Instrument> instruments) {
+    public Mono<List<Instrument>> filterInstruments(List<Instrument> instruments, Flux<KeyTsProjection> keyTsFlux) {
         List<Instrument> relevantInstruments = instruments.stream()
                 .filter(i -> i.getInstrumentType().equals(InstrumentType.CURRENCY)
                         || (i.getAdditionalMaps() != null &&
                                 i.getAdditionalMaps().get(AdditionalMaps.EQUITYSYMBOLS) != null))
                 .collect(Collectors.toList());
 
-        return dataReaderImpl.getKeyToTsMap()
+        return keyTsFlux
                 .collectMap(KeyTsProjection::getInstrumentBusinesskey, KeyTsProjection::getLastUpdateTs)
                 .map(keyTsMap -> {
                     // 1. Instruments NOT in KeyTsProjection
                     List<Instrument> nonMatching = relevantInstruments.stream()
                             .filter(instr -> !keyTsMap.containsKey(instr.getBusinesskey()))
-                            .limit(5)
+                            .limit(NUMBER_OF_INSTRUMENT2IMPORT)
                             .collect(Collectors.toList());
 
                     // 2. Instruments that ARE in KeyTsProjection
@@ -129,7 +143,7 @@ public class AlphavantageHandler implements ImportHandler {
                                         LocalDateTime ts = keyTsMap.get(instr.getBusinesskey());
                                         return ts != null ? ts : LocalDateTime.MIN;
                                     }))
-                            .limit(5)
+                            .limit(NUMBER_OF_INSTRUMENT2IMPORT)
                             .collect(Collectors.toList());
 
                     // 3. Combine results
@@ -137,6 +151,37 @@ public class AlphavantageHandler implements ImportHandler {
                     combined.addAll(matchingSortedByOldestTs);
                     return combined;
                 });
+    }
+
+    @Override
+    public SecurityMetrics importSecurityMetrics(Instrument security) {
+        var securityMetrics = new SecurityMetrics();
+        securityMetrics.setBusinesskey(security.getBusinesskey());
+        securityMetrics.setDescription(security.getDescription());
+        InstrumentType securityType = security.getInstrumentType();
+        if (securityType.equals(InstrumentType.EQUITY)) {
+            var symbols = security.getAdditionalMaps().get(AdditionalMaps.EQUITYSYMBOLS);
+            if (symbols != null && !symbols.isEmpty()) {
+
+                String symbol = symbols.keySet().stream()
+                                .findFirst()
+                                .orElseThrow(() -> new IllegalArgumentException("No symbol found for security: " + security.getBusinesskey()));
+                 
+                String url = SECURITYMETRICS_OVERVIEW_URLPREFIX + symbol + SECURITYMETRICS_OVERVIEW_URLPOSTFIX;
+                Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
+                if (map != null && !map.isEmpty()) {
+                        securityMetrics.setCurrencyCode(map.get("Currency").toString());
+                        securityMetrics.setSector(map.get("Sector").toString());
+                        securityMetrics.setDividendPerShare(Double.valueOf(map.get("DividendPerShare").toString()));
+                        securityMetrics.setEps(Double.valueOf(map.get("EPS").toString()));
+                        securityMetrics.setSharesOutstanding(Double.valueOf(map.get("SharesOutstanding").toString()));
+                        securityMetrics.setRevenue(Double.valueOf(map.get("RevenueTTM").toString()));
+                        securityMetrics.setBeta(Double.valueOf(map.get("Beta").toString()));
+                }
+            }
+        }
+
+        return securityMetrics;
     }
 
 }

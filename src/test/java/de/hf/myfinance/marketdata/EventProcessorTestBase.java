@@ -3,6 +3,7 @@ package de.hf.myfinance.marketdata;
 import de.hf.framework.audit.AuditService;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.marketdata.events.out.PriceUpdateEventHandler;
+import de.hf.myfinance.marketdata.events.out.SecurityMetricsImportedEventHandler;
 import de.hf.myfinance.marketdata.importhandler.AlphavantageHandler;
 import de.hf.myfinance.marketdata.importhandler.ImportHandler;
 import de.hf.myfinance.marketdata.persistence.DataReaderImpl;
@@ -62,6 +63,9 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     PriceUpdateEventHandler priceUpdateEventHandler;
 
     @Autowired
+    SecurityMetricsImportedEventHandler securityMetricsImportedEventHandler;
+
+    @Autowired
     @Qualifier("saveInstrumentProcessor")
     protected Consumer<Event<String, Instrument>> saveInstrumentProcessor;
 
@@ -76,7 +80,7 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     @BeforeEach
     void setupDb() {
         importHandler = new AlphavantageHandler(webRequest, auditService, dataReaderImpl);
-        marketDataService = new MarketDataService(dataReaderImpl, importHandler, priceUpdateEventHandler, auditService);
+        marketDataService = new MarketDataService(dataReaderImpl, importHandler, priceUpdateEventHandler, securityMetricsImportedEventHandler, auditService);
 
         instrumentRepository.deleteAll().block();
         endOfDayPricesRepository.deleteAll().block();

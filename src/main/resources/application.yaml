@@ -14,7 +14,7 @@ springdoc:
 spring:
   cloud:
     function:
-      definition: saveInstrumentProcessor;loadNewMarketDataProcessor;saveEndOfDayPriceProcessor;validateSinglePriceProcessor
+      definition: saveInstrumentProcessor;loadNewMarketDataProcessor;loadSecurityMetricsProcessor;saveEndOfDayPriceProcessor;validateSinglePriceProcessor;saveSecurityMetricsProcessor
 
 spring.cloud.stream:
   defaultBinder: rabbit
@@ -25,6 +25,9 @@ spring.cloud.stream:
   bindings.loadNewMarketDataProcessor-in-0:
     destination: loadNewMarketData
     group: loadNewMarketDataGroup
+  bindings.loadSecurityMetricsProcessor-in-0:
+    destination: loadSecurityMetrics
+    group: loadSecurityMetricsGroup
   bindings.saveEndOfDayPriceProcessor-in-0:
     destination: pricesupdated
     group: savePricesGroup
@@ -32,8 +35,15 @@ spring.cloud.stream:
     destination: pricesupdated
     producer:
       required-groups: savePricesGroup
+  bindings.securitymetrics-updated-out-0:
+    destination: securitymetricsupdated
+    producer:
+      required-groups: saveSecuritymetricsGroup
+  bindings.saveSecurityMetricsProcessor-in-0:
+    destination: securitymetricsupdated
+    group: saveSecuritymetricsGroup
   bindings.loadNewMarketData-out-0:
-    destination: loadNewMarketDataRequest
+    destination: loadNewMarketData
     producer:
       required-groups: loadNewMarketDataGroup
   bindings.validateSinglePriceProcessor-in-0:
