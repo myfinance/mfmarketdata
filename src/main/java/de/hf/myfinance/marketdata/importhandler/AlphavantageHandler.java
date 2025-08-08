@@ -367,12 +367,12 @@ public class AlphavantageHandler implements ImportHandler {
     }
 
     private double extractDoubleValueFromAnnualReport(Map<String, String> report, String propertyKey) {
-        return Double.parseDouble(report.get("totalRevenue"));
+        return parseDouble(report.get(propertyKey));
     }
 
     private double extractValueFromQuarterlyReport(List<Map<String, String>> latest4Reports, String propertyKey) {
         return latest4Reports.stream()
-                .mapToDouble(report -> Double.parseDouble(report.get(propertyKey)))
+                .mapToDouble(report -> parseDouble(report.get(propertyKey)))
                 .sum();
     }
 
@@ -412,13 +412,29 @@ public class AlphavantageHandler implements ImportHandler {
         if (map != null && !map.isEmpty()) {
             returnvalue.setCurrencyCode(map.get("Currency").toString());
             returnvalue.setSector(map.get("Sector").toString());
-            returnvalue.setDividendPerShare(Double.valueOf(map.get("DividendPerShare").toString()));
-            returnvalue.setEps(Double.valueOf(map.get("EPS").toString()));
-            returnvalue.setSharesOutstanding(Double.valueOf(map.get("SharesOutstanding").toString()));
-            returnvalue.setRevenue(Double.valueOf(map.get("RevenueTTM").toString()));
-            returnvalue.setBeta(Double.valueOf(map.get("Beta").toString()));
+            returnvalue.setDividendPerShare(extractDoubleValue("DividendPerShare", map));
+            returnvalue.setEps(extractDoubleValue("EPS", map));
+            returnvalue.setSharesOutstanding(extractDoubleValue("SharesOutstanding", map));
+            returnvalue.setRevenue(extractDoubleValue("RevenueTTM", map));
+            returnvalue.setBeta(extractDoubleValue("Beta", map));
         }
         return returnvalue;
+    }
+
+    private Double extractDoubleValue(String property, Map<String, Object> report) {
+        var value = report.get(property);
+        return parseDouble(value);
+    }
+
+    private Double parseDouble(Object value) {
+        try {
+            if (value != null ) {
+                return Double.parseDouble(value.toString());
+            }
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+        return 0.0;
     }
 
 }
