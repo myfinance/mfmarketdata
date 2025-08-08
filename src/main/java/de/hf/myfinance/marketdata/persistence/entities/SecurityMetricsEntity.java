@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import de.hf.myfinance.restmodel.RiskProfile;
 import de.hf.myfinance.restmodel.SecurityLifecyclePhase;
 
-@Document(collection = "prices")
+@Document(collection = "SecurityMetrics")
 public class SecurityMetricsEntity {
     @Id
     private String securityMetricsid;

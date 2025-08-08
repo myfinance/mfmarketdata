@@ -3,8 +3,10 @@ package de.hf.myfinance.marketdata.persistence;
 import de.hf.myfinance.marketdata.persistence.repositories.EndOfDayPricesRepository;
 import de.hf.myfinance.marketdata.persistence.repositories.InstrumentRepository;
 import de.hf.myfinance.marketdata.persistence.repositories.SecurityMetricsRepository;
+import de.hf.myfinance.restmodel.AdditionalProperties;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.restmodel.Instrument;
+import de.hf.myfinance.restmodel.InstrumentType;
 import de.hf.myfinance.restmodel.SecurityMetrics;
 
 import org.springframework.stereotype.Component;
@@ -74,7 +76,7 @@ public class DataReaderImpl implements DataReader{
 
     @Override
     public Mono<SecurityMetrics> findSecurityMetrics4Instrument(String instrumentBusinesskey) {
-        return securityMetricsRepository.findByInstrumentBusinesskey(instrumentBusinesskey)
+        return securityMetricsRepository.findByBusinesskey(instrumentBusinesskey)
                 .map(e->
                         securityMetricsMapper.entityToApi(e)
                 );
@@ -85,4 +87,16 @@ public class DataReaderImpl implements DataReader{
         return securityMetricsRepository.findAllBy();
     }
 
+    @Override
+    public Mono<Instrument> findCurrencyByCurrencyCode(String CurrencyCode) {
+        return instrumentRepository.findAll().filter(i->i.getInstrumentType().equals(InstrumentType.CURRENCY))
+                .filter(i->{
+                    return i.getAdditionalProperties().get(AdditionalProperties.CURRENCYCODE).equals(CurrencyCode);
+                })
+                .next()  // Assuming only one currency with a specific code exists
+                .switchIfEmpty(Mono.error(new RuntimeException("Currency not found for code: " + CurrencyCode)))
+                .map(e->
+                        instrumentMapper.entityToApi(e)
+                );
+    }
 }

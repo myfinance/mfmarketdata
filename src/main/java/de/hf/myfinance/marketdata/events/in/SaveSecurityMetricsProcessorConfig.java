@@ -36,8 +36,7 @@ public class SaveSecurityMetricsProcessorConfig {
                     SecurityMetrics  securityMetrics = event.getData();
                     auditService.saveMessage("Create securityMetrics with ID: "+ securityMetrics.getBusinesskey(), Severity.INFO, AUDIT_MSG_TYPE);
                     var entity = securityMetricsMapper.apiToEntity(securityMetrics);
-                    securityMetricRepository.deleteByInstrumentBusinesskey(entity.getBusinesskey()).then(securityMetricRepository.save(entity)).block();
-
+                    securityMetricRepository.deleteByBusinesskey(entity.getBusinesskey()).then(securityMetricRepository.save(entity)).block();
                     break;
 
                 default:

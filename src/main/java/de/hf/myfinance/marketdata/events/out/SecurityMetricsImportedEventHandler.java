@@ -19,7 +19,7 @@ public class SecurityMetricsImportedEventHandler {
     }
 
     public void sendSecurityMetricsUpdatedEvent(SecurityMetrics securityMetrics){
-        sendMessage("securitymetrics-updated-out-0",
+        sendMessage("securitymetricsupdated-out-0",
                 new Event(CREATE, securityMetrics.getBusinesskey(), securityMetrics));
     }
 

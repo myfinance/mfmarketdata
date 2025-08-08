@@ -8,8 +8,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface SecurityMetricsRepository extends ReactiveCrudRepository<SecurityMetricsEntity, String> {
-    Mono<SecurityMetricsEntity> findByInstrumentBusinesskey(String instrumentBusinesskey);
-    Mono<Long> deleteByInstrumentBusinesskey(String instrumentBusinesskey);
+    Mono<SecurityMetricsEntity> findByBusinesskey(String businesskey);
+    Mono<Long> deleteByBusinesskey(String businesskey);
 
     Flux<KeyTsProjection> findAllBy();
 }

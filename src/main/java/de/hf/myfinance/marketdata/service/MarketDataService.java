@@ -8,7 +8,9 @@ import de.hf.myfinance.marketdata.importhandler.ImportHandler;
 import de.hf.myfinance.marketdata.persistence.DataReader;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.restmodel.Instrument;
+import de.hf.myfinance.restmodel.SecurityMetrics;
 
+import java.security.Security;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Component;
@@ -103,7 +105,7 @@ public class MarketDataService {
 
     }
 
-    public Flux<Void> importSecurityMetrics() {
+    public Flux<SecurityMetrics> importSecurityMetrics() {
         return dataReader.findActiveInstruments()
             .collectList()
             .flatMap(instrumentList->importhandler.filterInstruments(instrumentList, dataReader.getSecurityMetricsKeyToTsMap()))
@@ -111,18 +113,32 @@ public class MarketDataService {
             .flatMap(i->importSecurityMetrics4Instrument(i));
     }
 
-    public Mono<Void> importSecurityMetrics4InstrumentKey(String businesskey) {
+    public Mono<SecurityMetrics> importSecurityMetrics4InstrumentKey(String businesskey) {
         return dataReader.findByBusinesskey(businesskey)
             .flatMap(i->importSecurityMetrics4Instrument(i));
     }
 
-    private Mono<Void> importSecurityMetrics4Instrument(Instrument instrument) {
-        var securityMetrics = importhandler.importSecurityMetrics(instrument);
+    private Mono<SecurityMetrics> importSecurityMetrics4Instrument(Instrument instrument) {
+        return Mono.just(importhandler.importSecurityMetrics(instrument))
+            .flatMap(this::setCurrencykey)
+            .flatMap(this::approveSecurityMetrics);
+    }
+
+    private Mono<SecurityMetrics> approveSecurityMetrics(SecurityMetrics securityMetrics) {
         securityMetrics.setLastUpdateTs(LocalDateTime.now());
         if(securityMetrics!=null){
             securityMetricsImportedEventHandler.sendSecurityMetricsUpdatedEvent(securityMetrics);
         }
-        return Mono.just("").then();
+        return Mono.just(securityMetrics);
+    }
+
+    private Mono<SecurityMetrics> setCurrencykey(SecurityMetrics securityMetrics) {
+        return dataReader.findCurrencyByCurrencyCode(securityMetrics.getCurrencyCode())
+            .switchIfEmpty(handleNotExistingInstrument(securityMetrics.getCurrencyCode()))
+            .flatMap(currency -> {
+                securityMetrics.setCurrencyKey(currency.getBusinesskey());
+                return Mono.just(securityMetrics);
+            });
     }
 
 }
