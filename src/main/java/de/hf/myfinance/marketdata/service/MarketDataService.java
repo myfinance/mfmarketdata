@@ -10,7 +10,6 @@ import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.restmodel.Instrument;
 import de.hf.myfinance.restmodel.SecurityMetrics;
 
-import java.security.Security;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Component;

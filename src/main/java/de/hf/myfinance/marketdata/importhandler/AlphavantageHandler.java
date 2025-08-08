@@ -179,8 +179,9 @@ public class AlphavantageHandler implements ImportHandler {
                         .findFirst()
                         .orElseThrow(() -> new IllegalArgumentException(
                                 "No symbol found for security: " + security.getBusinesskey()));
-                securityMetrics = getMockValues(securityMetrics); // For testing purposes, remove in production
-                // importOverview(securityMetrics, symbol);
+                //securityMetrics = getMockValues(securityMetrics); // For testing purposes, remove in production
+                securityMetrics = importOverview(securityMetrics, symbol);
+                securityMetrics = importCashFlowView(securityMetrics, symbol);
                 //securityMetrics = importIncomeView(securityMetrics, symbol);
             }
         }
@@ -199,7 +200,7 @@ public class AlphavantageHandler implements ImportHandler {
         return returnvalue;
     }
 
-    private SecurityMetrics importCashFlowView(SecurityMetrics securityMetrics, String symbol) {
+    private SecurityMetrics importBalanceView(SecurityMetrics securityMetrics, String symbol) {
         var returnvalue = securityMetrics;
         String url = SECURITYMETRICS_CASHFLOWVIEW_URLPREFIX + symbol + SECURITYMETRICS_URLPOSTFIX;
         Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
@@ -247,7 +248,7 @@ public class AlphavantageHandler implements ImportHandler {
 
         return returnvalue;
     }
-    private SecurityMetrics importBalanceView(SecurityMetrics securityMetrics, String symbol) {
+    private SecurityMetrics importCashFlowView(SecurityMetrics securityMetrics, String symbol) {
         var returnvalue = securityMetrics;
         String url = SECURITYMETRICS_BALANCEVIEW_URLPREFIX + symbol + SECURITYMETRICS_URLPOSTFIX;
         Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
