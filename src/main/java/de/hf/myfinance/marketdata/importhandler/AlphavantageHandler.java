@@ -202,7 +202,7 @@ public class AlphavantageHandler implements ImportHandler {
 
     private SecurityMetrics importBalanceView(SecurityMetrics securityMetrics, String symbol) {
         var returnvalue = securityMetrics;
-        String url = SECURITYMETRICS_CASHFLOWVIEW_URLPREFIX + symbol + SECURITYMETRICS_URLPOSTFIX;
+        String url = SECURITYMETRICS_BALANCEVIEW_URLPREFIX + symbol + SECURITYMETRICS_URLPOSTFIX;
         Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
 
         if (map == null || map.isEmpty()) {
@@ -250,7 +250,7 @@ public class AlphavantageHandler implements ImportHandler {
     }
     private SecurityMetrics importCashFlowView(SecurityMetrics securityMetrics, String symbol) {
         var returnvalue = securityMetrics;
-        String url = SECURITYMETRICS_BALANCEVIEW_URLPREFIX + symbol + SECURITYMETRICS_URLPOSTFIX;
+        String url = SECURITYMETRICS_CASHFLOWVIEW_URLPREFIX + symbol + SECURITYMETRICS_URLPOSTFIX;
         Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
 
         if (map == null || map.isEmpty()) {
