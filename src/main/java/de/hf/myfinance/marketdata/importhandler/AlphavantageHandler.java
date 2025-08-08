@@ -358,10 +358,10 @@ public class AlphavantageHandler implements ImportHandler {
     private SecurityMetrics setCurrency(String symbol, SecurityMetrics securityMetrics,
             Map<String, String> latestAnnualReport) {
         var returnvalue = securityMetrics;
-        if(securityMetrics.getCurrencyCode() == null || securityMetrics.getCurrencyCode().isEmpty()) {
-            returnvalue.setCurrencyCode(latestAnnualReport.get("currency"));
-        } else  if (!returnvalue.getCurrencyCode().equals(latestAnnualReport.get("currency"))) {
-            auditService.saveMessage("Currency mismatch in quarterly report for " + symbol, Severity.ERROR, AUDIT_MSG_TYPE);
+        if(returnvalue.getCurrencyCode() == null || returnvalue.getCurrencyCode().isEmpty()) {
+            returnvalue.setCurrencyCode(latestAnnualReport.get("reportedCurrency"));
+        } else  if (!returnvalue.getCurrencyCode().equals(latestAnnualReport.get("reportedCurrency"))) {
+            auditService.saveMessage("Currency mismatch in report for " + symbol, Severity.ERROR, AUDIT_MSG_TYPE);
         }
         return returnvalue;
     }
