@@ -1,16 +1,5 @@
 package de.hf.myfinance.marketdata.importhandler;
 
-import de.hf.framework.audit.AuditService;
-import de.hf.framework.audit.Severity;
-import de.hf.myfinance.marketdata.persistence.DataReaderImpl;
-import de.hf.myfinance.marketdata.persistence.KeyTsProjection;
-import de.hf.myfinance.marketdata.webtools.WebRequest;
-import de.hf.myfinance.restmodel.*;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,25 +10,40 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
-public class AlphavantageHandler implements ImportHandler {
+import de.hf.framework.audit.AuditService;
+import de.hf.framework.audit.Severity;
+import de.hf.myfinance.marketdata.persistence.DataReaderImpl;
+import de.hf.myfinance.marketdata.persistence.KeyTsProjection;
+import de.hf.myfinance.marketdata.webtools.WebRequest;
+import de.hf.myfinance.restmodel.AdditionalMaps;
+import de.hf.myfinance.restmodel.AdditionalProperties;
+import de.hf.myfinance.restmodel.EndOfDayPrice;
+import de.hf.myfinance.restmodel.Instrument;
+import de.hf.myfinance.restmodel.InstrumentType;
+import de.hf.myfinance.restmodel.SecurityMetrics;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+public class PolygonHandler  implements ImportHandler {
 
     private final DataReaderImpl dataReaderImpl;
 
     WebRequest webRequest;
     AuditService auditService;
 
-    public final static String ALPHAVANTAGE_API_KEY = "Q6RLS6PGB55105EP"; // Replace with your actual API key
+   //https://api.polygon.io/v2/aggs/ticker/SAP/prev?apiKey=bE0SPbXzJaCmVasf67Y0gdb4fOExSQ4p"
+   //https://api.polygon.io/vX/reference/financials?ticker=MSFT&timeframe=ttm&order=asc&limit=10&sort=filing_date&apiKey=bE0SPbXzJaCmVasf67Y0gdb4fOExSQ4p
+    public final static String API_KEY = "bE0SPbXzJaCmVasf67Y0gdb4fOExSQ4p"; // Replace with your actual API key
     public final static String URLPREFIX = "https://www.alphavantage.co/query?function=";
     public final static String SYMBOL_PREFIX = "&symbol=";
 
     public final static String EQ_FUNCTION = "TIME_SERIES_WEEKLY";
     public final static String EQ_URLPREFIX = URLPREFIX + EQ_FUNCTION + SYMBOL_PREFIX;
-    public final static String EQ_URLPOSTFIX = "&apikey=" + ALPHAVANTAGE_API_KEY;
+    public final static String EQ_URLPOSTFIX = "&apikey=" + API_KEY;
 
     public final static String FX_FUNCTION = "FX_DAILY";
     public final static String FX_URLPREFIX = URLPREFIX + FX_FUNCTION + "&from_symbol=";
-    public final static String FX_URLPOSTFIX = "&to_symbol=EUR&apikey=" + ALPHAVANTAGE_API_KEY;
+    public final static String FX_URLPOSTFIX = "&to_symbol=EUR&apikey=" + API_KEY;
 
     public final static String SECURITYMETRICS_OVERVIEW_FUNCTION = "OVERVIEW";
     public final static String SECURITYMETRICS_OVERVIEW_URLPREFIX = URLPREFIX + SECURITYMETRICS_OVERVIEW_FUNCTION
@@ -54,14 +58,14 @@ public class AlphavantageHandler implements ImportHandler {
     public final static String SECURITYMETRICS_CASHFLOWVIEW_URLPREFIX = URLPREFIX
             + SECURITYMETRICS_CASHFLOWVIEW_FUNCTION
             + SYMBOL_PREFIX;
-    public final static String SECURITYMETRICS_URLPOSTFIX = "&apikey=" + ALPHAVANTAGE_API_KEY;
+    public final static String SECURITYMETRICS_URLPOSTFIX = "&apiKey=" + API_KEY;
 
     private static final Integer NUMBER_OF_INSTRUMENT2IMPORT = 5;
     private static final Integer NUMBER_OF_INSTRUMENTMETRICS2IMPORT = 5;
 
     protected static final String AUDIT_MSG_TYPE = "AlphavantageHandler_Event";
 
-    public AlphavantageHandler(WebRequest webRequest, AuditService auditService, DataReaderImpl dataReaderImpl) {
+    public PolygonHandler(WebRequest webRequest, AuditService auditService, DataReaderImpl dataReaderImpl) {
         this.webRequest = webRequest;
         this.auditService = auditService;
         this.dataReaderImpl = dataReaderImpl;

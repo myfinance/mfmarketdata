@@ -1,8 +1,5 @@
 package de.hf.myfinance.marketdata.persistence;
 
-
-import org.springframework.data.mongodb.core.aggregation.ArrayOperators.In;
-
 import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.restmodel.Instrument;
 import de.hf.myfinance.restmodel.SecurityMetrics;

@@ -15,5 +15,6 @@ import java.util.Map;
 public interface ImportHandler {
     Map<LocalDate, EndOfDayPrice> importPrices(Instrument security);
     Mono<List<Instrument>> filterInstruments(List<Instrument> instruments, Flux<KeyTsProjection> keyTsFlux);
+    Mono<List<Instrument>> filterEQInstruments(List<Instrument> instruments, Flux<KeyTsProjection> keyTsFlux);
     SecurityMetrics importSecurityMetrics(Instrument security);
 }
