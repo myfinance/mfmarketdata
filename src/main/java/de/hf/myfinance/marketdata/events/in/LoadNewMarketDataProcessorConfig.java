@@ -12,13 +12,13 @@ import org.springframework.context.annotation.Configuration;
 import java.util.function.Consumer;
 
 @Configuration
-public class L2oadNewMarketDataProcessorConfig {
+public class LoadNewMarketDataProcessorConfig {
 
     private final MarketDataService marketDataService;
     private final AuditService auditService;
     protected static final String AUDIT_MSG_TYPE="loadNewMarketDataProcessorConfig_Event";
 
-    public L2oadNewMarketDataProcessorConfig(MarketDataService marketDataService, AuditService auditService) {
+    public LoadNewMarketDataProcessorConfig(MarketDataService marketDataService, AuditService auditService) {
         this.marketDataService = marketDataService;
         this.auditService = auditService;
     }
