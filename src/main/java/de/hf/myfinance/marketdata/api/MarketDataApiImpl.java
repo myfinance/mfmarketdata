@@ -4,6 +4,8 @@ import de.hf.myfinance.event.Event;
 import de.hf.myfinance.marketdata.service.MarketDataService;
 import de.hf.myfinance.restapi.MarketDataApi;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
+import de.hf.myfinance.restmodel.MarketDataImportType;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
@@ -40,7 +42,7 @@ public class MarketDataApiImpl implements MarketDataApi {
         return Mono.fromCallable(() -> {
 
             sendMessage("loadNewMarketData-out-0",
-                    new Event(START, "load", null));
+                    new Event(START, MarketDataImportType.TIME_SERIES_WEEKLY, null));
             return "MarketData loading started:";
         }).subscribeOn(publishEventScheduler);
     }

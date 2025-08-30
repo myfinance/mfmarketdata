@@ -59,7 +59,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DBK"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
 
-        marketDataService.importData().collectList().block();
+        marketDataService.importAllTimeSeries().collectList().block();
         var messages = getMessages("pricesupdated-out-0");
         assertEquals(1, messages.size());
         JsonHelper jsonHelper = new JsonHelper();
@@ -365,7 +365,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         endOfDayPrices.setLastUpdateTs(LocalDateTime.of(2024,1,6,12,12));
         endOfDayPricesRepository.save(endOfDayPrices).block();
 
-        marketDataService.importData().collectList().block();
+        marketDataService.importAllTimeSeries().collectList().block();
         var messages = getMessages("pricesupdated-out-0");
         assertEquals(10, messages.size());
 

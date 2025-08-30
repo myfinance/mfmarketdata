@@ -50,7 +50,7 @@ public class MarketDataService {
                 });
     }
 
-    public Flux<Void> importData() {
+    public Flux<Void> importAllTimeSeries() {
         return dataReader.findActiveInstruments()
             .collectList()
             .flatMap(instrumentList->importhandler.filterInstruments(instrumentList, dataReader.getKeyToTsMap()))
@@ -58,7 +58,7 @@ public class MarketDataService {
             .flatMap(i->importPrices4Instrument(i));
     }
 
-    public Mono<Void> importData4Instrument(String businesskey) {
+    public Mono<Void> importTimeSeries4Instrument(String businesskey) {
         return dataReader.findByBusinesskey(businesskey)
             .flatMap(i->importPrices4Instrument(i));
     }
