@@ -206,8 +206,8 @@ public class AlphavantageHandler implements ImportHandler {
                                 "No symbol found for security: " + security.getBusinesskey()));
                 // securityMetrics = getMockValues(securityMetrics); // For testing purposes,
                 // remove in production
-                //securityMetrics = importOverview(securityMetrics, symbol);
-                //securityMetrics = importCashFlowView(securityMetrics, symbol);
+                securityMetrics = importOverview(securityMetrics, symbol);
+                securityMetrics = importCashFlowView(securityMetrics, symbol);
                 // securityMetrics = importIncomeView(securityMetrics, symbol);
             }
         }
