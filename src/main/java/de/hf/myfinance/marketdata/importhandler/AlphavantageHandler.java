@@ -9,6 +9,7 @@ import de.hf.myfinance.restmodel.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Add;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -151,6 +152,10 @@ public class AlphavantageHandler implements ImportHandler {
         List<Instrument> relevantInstruments = instruments.stream()
                 .filter(i -> (i.getAdditionalMaps() != null &&
                         i.getAdditionalMaps().get(AdditionalMaps.EQUITYSYMBOLS) != null))
+                 .filter(i -> (i.getAdditionalProperties() != null &&
+                        i.getAdditionalProperties().get(AdditionalProperties.SOURCEOFSECURITYMETRICS) != null) && 
+                        (i.getAdditionalProperties().get(AdditionalProperties.SOURCEOFSECURITYMETRICS).equals("ALPHAVANTAGE")|| 
+                         i.getAdditionalProperties().get(AdditionalProperties.SOURCEOFSECURITYMETRICS).equals("all")))
                 .collect(Collectors.toList());
 
         return getTopInstruments2Import(keyTsFlux, relevantInstruments, NUMBER_OF_INSTRUMENTMETRICS2IMPORT);
@@ -201,8 +206,8 @@ public class AlphavantageHandler implements ImportHandler {
                                 "No symbol found for security: " + security.getBusinesskey()));
                 // securityMetrics = getMockValues(securityMetrics); // For testing purposes,
                 // remove in production
-                securityMetrics = importOverview(securityMetrics, symbol);
-                securityMetrics = importCashFlowView(securityMetrics, symbol);
+                //securityMetrics = importOverview(securityMetrics, symbol);
+                //securityMetrics = importCashFlowView(securityMetrics, symbol);
                 // securityMetrics = importIncomeView(securityMetrics, symbol);
             }
         }

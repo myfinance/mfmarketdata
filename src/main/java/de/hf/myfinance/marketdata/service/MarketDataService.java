@@ -107,7 +107,7 @@ public class MarketDataService {
     public Flux<SecurityMetrics> importSecurityMetrics() {
         return dataReader.findActiveInstruments()
             .collectList()
-            .flatMap(instrumentList->importhandler.filterInstruments(instrumentList, dataReader.getSecurityMetricsKeyToTsMap()))
+            .flatMap(instrumentList->importhandler.filterEQInstruments(instrumentList, dataReader.getSecurityMetricsKeyToTsMap()))
             .flatMapMany(Flux::fromIterable)
             .flatMap(i->importSecurityMetrics4Instrument(i));
     }
