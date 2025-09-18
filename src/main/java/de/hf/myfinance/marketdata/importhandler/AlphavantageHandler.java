@@ -8,8 +8,6 @@ import de.hf.myfinance.marketdata.webtools.WebRequest;
 import de.hf.myfinance.restmodel.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Add;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;

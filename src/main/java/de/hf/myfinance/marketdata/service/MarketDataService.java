@@ -12,6 +12,7 @@ import de.hf.myfinance.restmodel.SecurityMetrics;
 
 import java.time.LocalDateTime;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,16 +20,18 @@ import reactor.core.publisher.Mono;
 @Component
 public class MarketDataService {
     private final DataReader dataReader;
-    private final ImportHandler importhandler;
+    private final ImportHandler alphavantageHandler;
+    private final ImportHandler polygonHandler;
     private final PriceUpdateEventHandler priceUpdateEventHandler;
     private final SecurityMetricsImportedEventHandler securityMetricsImportedEventHandler;
     protected final AuditService auditService;
 
     protected static final String AUDIT_MSG_TYPE="MarketDataService_User_Event";
 
-    public MarketDataService(DataReader dataReader, ImportHandler importhandler, PriceUpdateEventHandler priceUpdateEventHandler, SecurityMetricsImportedEventHandler securityMetricsImportedEventHandler, AuditService auditService) {
+    public MarketDataService(DataReader dataReader, @Qualifier("alphavantageHandler") ImportHandler alphavantageHandler, @Qualifier("polygonHandler") ImportHandler polygonHandler, PriceUpdateEventHandler priceUpdateEventHandler, SecurityMetricsImportedEventHandler securityMetricsImportedEventHandler, AuditService auditService) {
         this.dataReader = dataReader;
-        this.importhandler = importhandler;
+        this.alphavantageHandler = alphavantageHandler;
+        this.polygonHandler = polygonHandler;
         this.priceUpdateEventHandler = priceUpdateEventHandler;
         this.securityMetricsImportedEventHandler = securityMetricsImportedEventHandler;
         this.auditService = auditService;
@@ -53,22 +56,35 @@ public class MarketDataService {
     public Flux<Void> importAllTimeSeries() {
         return dataReader.findActiveInstruments()
             .collectList()
-            .flatMap(instrumentList->importhandler.filterInstruments(instrumentList, dataReader.getKeyToTsMap()))
+            .flatMap(instrumentList->alphavantageHandler.filterInstruments(instrumentList, dataReader.getKeyToTsMap()))
             .flatMapMany(Flux::fromIterable)
-            .flatMap(i->importPrices4Instrument(i));
+            .flatMap(i->importPrices4Instrument(i, alphavantageHandler));
     }
 
     public Mono<Void> importTimeSeries4Instrument(String businesskey) {
         return dataReader.findByBusinesskey(businesskey)
-            .flatMap(i->importPrices4Instrument(i));
+            .flatMap(i->importPrices4Instrument(i, alphavantageHandler));
     }
 
-    private Mono<Void> importPrices4Instrument(Instrument instrument) {
+    public Flux<Void> importAllPrevClose() {
+        return dataReader.findActiveInstruments()
+            .collectList()
+            .flatMap(instrumentList->polygonHandler.filterInstruments(instrumentList, dataReader.getKeyToTsMap()))
+            .flatMapMany(Flux::fromIterable)
+            .flatMap(i->importPrices4Instrument(i, polygonHandler));
+    }
+
+    public Mono<Void> importPrevClose4Instrument(String businesskey) {
+        return dataReader.findByBusinesskey(businesskey)
+            .flatMap(i->importPrices4Instrument(i, polygonHandler));
+    }
+
+    private Mono<Void> importPrices4Instrument(Instrument instrument, ImportHandler importHandler) {
         return dataReader.findPrices4Instrument(instrument.getBusinesskey())
                 .switchIfEmpty(Mono.just(new EndOfDayPrices(instrument.getBusinesskey())))
                 .flatMap(p->{
                     var oldPrices = p.getPrices();
-                    oldPrices.putAll(importhandler.importPrices(instrument));
+                    oldPrices.putAll(importHandler.importPrices(instrument));
                     p.setPrices(oldPrices);
                     return Mono.just(p);
                 })
@@ -107,7 +123,7 @@ public class MarketDataService {
     public Flux<SecurityMetrics> importSecurityMetrics() {
         return dataReader.findActiveInstruments()
             .collectList()
-            .flatMap(instrumentList->importhandler.filterEQInstruments(instrumentList, dataReader.getSecurityMetricsKeyToTsMap()))
+            .flatMap(instrumentList->alphavantageHandler.filterEQInstruments(instrumentList, dataReader.getSecurityMetricsKeyToTsMap()))
             .flatMapMany(Flux::fromIterable)
             .flatMap(i->importSecurityMetrics4Instrument(i));
     }
@@ -118,7 +134,7 @@ public class MarketDataService {
     }
 
     private Mono<SecurityMetrics> importSecurityMetrics4Instrument(Instrument instrument) {
-        return Mono.just(importhandler.importSecurityMetrics(instrument))
+        return Mono.just(alphavantageHandler.importSecurityMetrics(instrument))
             .flatMap(this::setCurrencykey)
             .flatMap(this::approveSecurityMetrics);
     }

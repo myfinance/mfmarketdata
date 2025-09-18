@@ -43,6 +43,12 @@ public class LoadNewMarketDataProcessorConfig {
                             }
                             break;
                         case PREV_CLOSE:
+                            if(data==null || data.equals("all")){
+                                marketDataService.importAllPrevClose().collectList().block();
+                            }
+                            else {
+                                marketDataService.importPrevClose4Instrument(data).block();
+                            }
                             break;
                         case SECURITYMETRICS:
                             if(data==null || data.equals("all")){

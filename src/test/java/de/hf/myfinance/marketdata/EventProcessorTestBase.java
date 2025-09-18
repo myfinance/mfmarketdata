@@ -6,6 +6,7 @@ import de.hf.myfinance.marketdata.events.out.PriceUpdateEventHandler;
 import de.hf.myfinance.marketdata.events.out.SecurityMetricsImportedEventHandler;
 import de.hf.myfinance.marketdata.importhandler.AlphavantageHandler;
 import de.hf.myfinance.marketdata.importhandler.ImportHandler;
+import de.hf.myfinance.marketdata.importhandler.PolygonHandler;
 import de.hf.myfinance.marketdata.persistence.DataReaderImpl;
 import de.hf.myfinance.marketdata.persistence.repositories.EndOfDayPricesRepository;
 import de.hf.myfinance.marketdata.persistence.repositories.InstrumentRepository;
@@ -54,7 +55,6 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     AuditService auditService;
 
     MarketDataService marketDataService;
-    ImportHandler importHandler;
 
     @Autowired
     private OutputDestination target;
@@ -79,8 +79,9 @@ public class EventProcessorTestBase extends MongoDbTestBase {
 
     @BeforeEach
     void setupDb() {
-        importHandler = new AlphavantageHandler(webRequest, auditService, dataReaderImpl);
-        marketDataService = new MarketDataService(dataReaderImpl, importHandler, priceUpdateEventHandler, securityMetricsImportedEventHandler, auditService);
+        ImportHandler alphavantageHandler = new AlphavantageHandler(webRequest, auditService, dataReaderImpl);
+        ImportHandler polygonHandler = new PolygonHandler(webRequest, auditService, dataReaderImpl);
+        marketDataService = new MarketDataService(dataReaderImpl, alphavantageHandler, polygonHandler, priceUpdateEventHandler, securityMetricsImportedEventHandler, auditService);
 
         instrumentRepository.deleteAll().block();
         endOfDayPricesRepository.deleteAll().block();
