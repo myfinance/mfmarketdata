@@ -1,14 +1,12 @@
 package de.hf.myfinance.marketdata.importhandler;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
 
 import de.hf.framework.audit.AuditService;
 import de.hf.framework.audit.Severity;
@@ -24,16 +22,17 @@ import de.hf.myfinance.restmodel.SecurityMetrics;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class PolygonHandler  implements ImportHandler {
+@Component
+public class PolygonHandler implements ImportHandler {
 
     private final DataReaderImpl dataReaderImpl;
 
     WebRequest webRequest;
     AuditService auditService;
 
-    //https://api.polygon.io/v2/aggs/ticker/SAP/prev?apiKey=bE0SPbXzJaCmVasf67Y0gdb4fOExSQ4p
-    //https://api.polygon.io/v2/aggs/ticker/C:USDEUR/prev?apiKey=bE0SPbXzJaCmVasf67Y0gdb4fOExSQ4p
-    //https://api.polygon.io/vX/reference/financials?ticker=MSFT&timeframe=ttm&order=asc&limit=10&sort=filing_date&apiKey=bE0SPbXzJaCmVasf67Y0gdb4fOExSQ4p
+    // https://api.polygon.io/v2/aggs/ticker/SAP/prev?apiKey=bE0SPbXzJaCmVasf67Y0gdb4fOExSQ4p
+    // https://api.polygon.io/v2/aggs/ticker/C:USDEUR/prev?apiKey=bE0SPbXzJaCmVasf67Y0gdb4fOExSQ4p
+    // https://api.polygon.io/vX/reference/financials?ticker=MSFT&timeframe=ttm&order=asc&limit=10&sort=filing_date&apiKey=bE0SPbXzJaCmVasf67Y0gdb4fOExSQ4p
 
     public final static String API_KEY = "bE0SPbXzJaCmVasf67Y0gdb4fOExSQ4p"; // Replace with your actual API key
     public final static String URLPREFIX = "https://api.polygon.io/";
@@ -44,11 +43,9 @@ public class PolygonHandler  implements ImportHandler {
     public final static String PRICE_URLPOSTFIX = "/prev?" + URLPOSTFIX;
     public final static String PRICE_URLPREFIX = URLPREFIX + PRICE_PREFIX;
     public final static String FX_URLPREFIX = PRICE_URLPREFIX + "C:";
+    public final static String FX_URLPOSTFIX = "EUR" + PRICE_URLPOSTFIX;
     public final static String SECURITYMETRICS_PREFIX = URLPREFIX + "vX/reference/financials?ticker=";
     public final static String SECURITYMETRICS_URLPOSTFIX = "&timeframe=ttm&order=asc&sort=filing_date&" + URLPOSTFIX;
-
-
-
 
     protected static final String AUDIT_MSG_TYPE = "PolygonHandler_Event";
 
@@ -73,7 +70,7 @@ public class PolygonHandler  implements ImportHandler {
             }
         } else if (securityType.equals(InstrumentType.CURRENCY)) {
             String currencyCode = security.getAdditionalProperties().get(AdditionalProperties.CURRENCYCODE);
-            String url = FX_URLPREFIX + currencyCode + PRICE_URLPOSTFIX;
+            String url = FX_URLPREFIX + currencyCode + FX_URLPOSTFIX;
             var prices = getPreviosEndOfDayPrice(url);
             add2Pricemap(values, Instrument.DEFAULTCURRENCY, prices);
         }
@@ -93,7 +90,7 @@ public class PolygonHandler  implements ImportHandler {
     private Map<LocalDate, Double> getPreviosEndOfDayPrice(String url) {
         Map<LocalDate, Double> prices = new HashMap<>();
         Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
-        Map<String, Object> timeSeries = (Map<String, Object>) map.get("results");
+        Map<String, Object> timeSeries = (Map<String, Object>) ((List<Object>) map.get("results")).get(0);
         if (timeSeries == null) {
             auditService.saveMessage("invalid request or no data for url " + url, Severity.ERROR, AUDIT_MSG_TYPE);
             if (map != null && map.containsKey("Error Message")) {
@@ -101,18 +98,14 @@ public class PolygonHandler  implements ImportHandler {
                         AUDIT_MSG_TYPE);
             }
         } else {
-            for (String dateString : timeSeries.keySet()) {
-                try {
-                    LocalDate date = LocalDate.parse(dateString);
-                    String valueString = ((Map<String, String>) timeSeries.get(dateString)).get("4. close");
-                    Double value = Double.parseDouble(valueString);
+            try {
+                LocalDate date = LocalDate.now().minusDays(1);
+                Double value = Double.parseDouble(timeSeries.get("c").toString());
+                prices.put(date, value);
 
-                    prices.put(date, value);
-
-                } catch (Exception e) {
-                    auditService.saveMessage("can not parse value for date" + dateString + " and url " + url,
-                            Severity.ERROR, AUDIT_MSG_TYPE);
-                }
+            } catch (Exception e) {
+                auditService.saveMessage("can not parse value for url " + url,
+                        Severity.ERROR, AUDIT_MSG_TYPE);
             }
         }
         return prices;
@@ -144,58 +137,13 @@ public class PolygonHandler  implements ImportHandler {
                         i.getAdditionalMaps().get(AdditionalMaps.EQUITYSYMBOLS) != null))
                 .collect(Collectors.toList());
 
-       return Mono.just(relevantInstruments);
+        return Mono.just(relevantInstruments);
     }
 
     @Override
     public SecurityMetrics importSecurityMetrics(Instrument security) {
-        var securityMetrics = new SecurityMetrics();
-        securityMetrics.setBusinesskey(security.getBusinesskey());
-        securityMetrics.setDescription(security.getDescription());
-        InstrumentType securityType = security.getInstrumentType();
-        if (securityType.equals(InstrumentType.EQUITY)) {
-            var symbols = security.getAdditionalMaps().get(AdditionalMaps.EQUITYSYMBOLS);
-            if (symbols != null && !symbols.isEmpty()) {
-
-                String symbol = symbols.keySet().stream()
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "No symbol found for security: " + security.getBusinesskey()));
-                String url = SECURITYMETRICS_PREFIX + symbol + SECURITYMETRICS_URLPOSTFIX;
-                Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
-            }
-        }
-
-        return securityMetrics;
-    }
-
-    private SecurityMetrics setCurrency(String symbol, SecurityMetrics securityMetrics,
-            Map<String, String> latestAnnualReport) {
-        var returnvalue = securityMetrics;
-        if (returnvalue.getCurrencyCode() == null || returnvalue.getCurrencyCode().isEmpty()) {
-            returnvalue.setCurrencyCode(latestAnnualReport.get("reportedCurrency"));
-        } else if (!returnvalue.getCurrencyCode().equals(latestAnnualReport.get("reportedCurrency"))) {
-            auditService.saveMessage("Currency mismatch in report for " + symbol, Severity.ERROR, AUDIT_MSG_TYPE);
-        }
-        return returnvalue;
-    }
-
-
-
-    private Double extractDoubleValue(String property, Map<String, Object> report) {
-        var value = report.get(property);
-        return parseDouble(value);
-    }
-
-    private Double parseDouble(Object value) {
-        try {
-            if (value != null) {
-                return Double.parseDouble(value.toString());
-            }
-        } catch (NumberFormatException e) {
-            return 0.0;
-        }
-        return 0.0;
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'importSecurityMetrics'");
     }
 
 }

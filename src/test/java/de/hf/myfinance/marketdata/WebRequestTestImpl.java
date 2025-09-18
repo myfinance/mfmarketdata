@@ -1,9 +1,11 @@
 package de.hf.myfinance.marketdata;
 
 import de.hf.myfinance.marketdata.importhandler.AlphavantageHandler;
+import de.hf.myfinance.marketdata.importhandler.PolygonHandler;
 import de.hf.myfinance.marketdata.webtools.WebRequestImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+
 
 import java.io.IOException;
 
@@ -64,6 +66,11 @@ public class WebRequestTestImpl extends WebRequestImpl {
                     "      \"3. low\": \"1.04880\",\n" +
                     "      \"4. close\": \"1.05540\"\n" +
                     "    }}}";
+        }else
+        if(url.startsWith(PolygonHandler.URLPREFIX)){
+            return "{\n" +
+                    "  \"ticker\":\"HOOD\",\"queryCount\":1,\"resultsCount\":1,\"adjusted\":true,\"results\":\n" +
+                    "   [{\"T\":\"HOOD\",\"v\":3.4516595e+07,\"vw\":117.5534,\"o\":117.09,\"c\":118.64,\"h\":119.13,\"l\":114.89,\"t\":1758139200000,\"n\":339339}],\"status\":\"OK\",\"request_id\":\"bbef5875f25a52947dcc7d6becaa3c8b\",\"count\":1}\n" ;
         }
         return "";
     }

@@ -56,7 +56,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         timeseries.put("2025-04-18",pricemapDay2);
         reply.put("Weekly Time Series", timeseries) ;
 
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DBK"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DBK"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
 
         marketDataService.importAllTimeSeries().collectList().block();
@@ -127,7 +127,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
         equity.setAdditionalMaps(additionalMaps);
         instrumentRepository.save(equity).block();
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB2"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB2"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
 
         //2. valid instrument with no existing price
@@ -144,7 +144,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
         equity.setAdditionalMaps(additionalMaps);
         instrumentRepository.save(equity).block();
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB4"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB4"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
 
         //3. valid instrument with no existing price
@@ -161,7 +161,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
         equity.setAdditionalMaps(additionalMaps);
         instrumentRepository.save(equity).block();
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB5"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB5"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
 
         //4. valid instrument with no existing price
@@ -178,7 +178,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
         equity.setAdditionalMaps(additionalMaps);
         instrumentRepository.save(equity).block();
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB6"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB6"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
 
         //5. valid instrument with no existing price
@@ -195,7 +195,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
         equity.setAdditionalMaps(additionalMaps);
         instrumentRepository.save(equity).block();
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB7"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB7"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
 
         //6. valid instrument with no existing price: should not get a new price
@@ -212,7 +212,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
         equity.setAdditionalMaps(additionalMaps);
         instrumentRepository.save(equity).block();
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB8"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB8"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
 
         //1. valid instrument with existing price
@@ -229,7 +229,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
         equity.setAdditionalMaps(additionalMaps);
         instrumentRepository.save(equity).block();
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB9"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DB9"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
         var endOfDayPrices = new EndOfDayPricesEntity();
         endOfDayPrices.setInstrumentBusinesskey("DE0000000009@14");
@@ -254,7 +254,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
         equity.setAdditionalMaps(additionalMaps);
         instrumentRepository.save(equity).block();
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"D10"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"D10"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
         endOfDayPrices = new EndOfDayPricesEntity();
         endOfDayPrices.setInstrumentBusinesskey("DE0000000010@14");
@@ -279,7 +279,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
         equity.setAdditionalMaps(additionalMaps);
         instrumentRepository.save(equity).block();
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"D11"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"D11"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
         endOfDayPrices = new EndOfDayPricesEntity();
         endOfDayPrices.setInstrumentBusinesskey("DE0000000011@14");
@@ -304,7 +304,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
         equity.setAdditionalMaps(additionalMaps);
         instrumentRepository.save(equity).block();
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"D12"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"D12"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
         endOfDayPrices = new EndOfDayPricesEntity();
         endOfDayPrices.setInstrumentBusinesskey("DE0000000012@14");
@@ -329,7 +329,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
         equity.setAdditionalMaps(additionalMaps);
         instrumentRepository.save(equity).block();
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"D13"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"D13"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
         endOfDayPrices = new EndOfDayPricesEntity();
         endOfDayPrices.setInstrumentBusinesskey("DE0000000013@14");
@@ -354,7 +354,7 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
         equity.setAdditionalMaps(additionalMaps);
         instrumentRepository.save(equity).block();
-        when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"D14"+AlphavantageHandler.EQ_URLPOSTFIX))
+        when(webRequestMock.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"D14"+AlphavantageHandler.EQ_URLPOSTFIX))
         .thenReturn(reply);
         endOfDayPrices = new EndOfDayPricesEntity();
         endOfDayPrices.setInstrumentBusinesskey("DE0000000014@14");
@@ -483,5 +483,47 @@ public class MarketDataServiceTest extends EventProcessorTestBase {
         assertTrue(prices.containsKey("2022-12-04"));
         assertEquals(120.0 , ((HashMap)prices.get("2022-12-04")).get("value"));
         assertEquals("EUR" , ((HashMap)prices.get("2022-12-04")).get("currencyKey"));
+    }
+
+        @Test
+    void importPolygonPrices() {
+        var equity = new InstrumentEntity();
+        equity.setActive(true);
+        equity.setInstrumentType(InstrumentType.EQUITY);
+        equity.setBusinesskey("DE0005140008@14");
+        var propertyMap = new HashMap<AdditionalProperties, String>();
+        propertyMap.put(AdditionalProperties.ISIN, "DE0005140008");
+        equity.setAdditionalProperties(propertyMap);
+        var additionalMaps = new HashMap<AdditionalMaps, Map<String, String>>();
+        var equitySymbols = new HashMap<String, String>();
+        equitySymbols.put("HOOD", "USD");
+        additionalMaps.put(AdditionalMaps.EQUITYSYMBOLS, equitySymbols);
+        equity.setAdditionalMaps(additionalMaps);
+        instrumentRepository.save(equity).block();
+
+        var reply = new HashMap<String, Object>();
+        var timeseries = new HashMap<String, Object>();
+        var pricemap = new HashMap<String, String>();
+        pricemap.put("4. close","238.8100");
+        timeseries.put("2025-04-17",pricemap);
+        var pricemapDay2 = new HashMap<String, String>();
+        pricemapDay2.put("4. close","239.8100");
+        timeseries.put("2025-04-18",pricemapDay2);
+        reply.put("Weekly Time Series", timeseries) ;
+
+
+        //when(webRequest.getJsonMapFromUrl(AlphavantageHandler.EQ_URLPREFIX+"DBK"+AlphavantageHandler.EQ_URLPOSTFIX))
+        //.thenReturn(reply);
+
+        marketDataService.importPrevClose4Instrument("DE0005140008@14").block();
+        var messages = getMessages("pricesupdated-out-0");
+        assertEquals(1, messages.size());
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+        assertEquals(equity.getBusinesskey(), data.get("instrumentBusinesskey"));
+        var prices = (HashMap)data.get("prices");
+        assertEquals(1, prices.size());
+        double price = (Double) ((HashMap)prices.values().toArray()[0]).get("value");
+        assertEquals(118.64,price);
     }
 }

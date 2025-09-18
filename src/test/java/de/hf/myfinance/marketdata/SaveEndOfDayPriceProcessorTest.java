@@ -3,7 +3,6 @@ package de.hf.myfinance.marketdata;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.EndOfDayPrice;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
-import de.hf.myfinance.restmodel.InstrumentType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

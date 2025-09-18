@@ -16,7 +16,6 @@ import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.restmodel.Instrument;
 import de.hf.testhelper.MongoDbTestBase;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,9 +43,10 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     EndOfDayPricesRepository endOfDayPricesRepository;
 
 
-
+    @Autowired
+    WebRequest webRequestTest;
     @Mock
-    WebRequest webRequest;
+    WebRequest webRequestMock;
 
     @Autowired
     DataReaderImpl dataReaderImpl;
@@ -79,8 +79,8 @@ public class EventProcessorTestBase extends MongoDbTestBase {
 
     @BeforeEach
     void setupDb() {
-        ImportHandler alphavantageHandler = new AlphavantageHandler(webRequest, auditService, dataReaderImpl);
-        ImportHandler polygonHandler = new PolygonHandler(webRequest, auditService, dataReaderImpl);
+        ImportHandler alphavantageHandler = new AlphavantageHandler(webRequestMock, auditService, dataReaderImpl);
+        ImportHandler polygonHandler = new PolygonHandler(webRequestTest, auditService, dataReaderImpl);
         marketDataService = new MarketDataService(dataReaderImpl, alphavantageHandler, polygonHandler, priceUpdateEventHandler, securityMetricsImportedEventHandler, auditService);
 
         instrumentRepository.deleteAll().block();
