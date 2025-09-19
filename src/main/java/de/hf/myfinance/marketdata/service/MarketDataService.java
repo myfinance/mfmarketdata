@@ -1,16 +1,21 @@
 package de.hf.myfinance.marketdata.service;
 
 import de.hf.framework.audit.AuditService;
+import de.hf.framework.audit.Severity;
 import de.hf.myfinance.exception.MFMsgKey;
 import de.hf.myfinance.marketdata.events.out.PriceUpdateEventHandler;
 import de.hf.myfinance.marketdata.events.out.SecurityMetricsImportedEventHandler;
 import de.hf.myfinance.marketdata.importhandler.ImportHandler;
 import de.hf.myfinance.marketdata.persistence.DataReader;
+import de.hf.myfinance.restmodel.EndOfDayPrice;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.restmodel.Instrument;
 import de.hf.myfinance.restmodel.SecurityMetrics;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -71,7 +76,15 @@ public class MarketDataService {
             .collectList()
             .flatMap(instrumentList->polygonHandler.filterInstruments(instrumentList, dataReader.getKeyToTsMap()))
             .flatMapMany(Flux::fromIterable)
-            .flatMap(i->importPrices4Instrument(i, polygonHandler));
+            // group instruments into batches of 5
+            .buffer(5)
+            // process each batch sequentially
+            .concatMap(batch ->
+                Flux.fromIterable(batch)
+                    .concatMap(i -> importPrices4Instrument(i, polygonHandler))
+                    // after each batch, wait 1 minute
+                    .then(Mono.delay(Duration.ofMinutes(2)).then())
+        );
     }
 
     public Mono<Void> importPrevClose4Instrument(String businesskey) {
@@ -84,7 +97,12 @@ public class MarketDataService {
                 .switchIfEmpty(Mono.just(new EndOfDayPrices(instrument.getBusinesskey())))
                 .flatMap(p->{
                     var oldPrices = p.getPrices();
-                    oldPrices.putAll(importHandler.importPrices(instrument));
+                    var newPrices = importHandler.importPrices(instrument);
+                    if(newPrices==null || newPrices.isEmpty()){
+                        auditService.saveMessage("No new prices found for instrument "+instrument.getBusinesskey(), Severity.WARN, AUDIT_MSG_TYPE);
+                        return Mono.just(new EndOfDayPrices(instrument.getBusinesskey()));
+                    }
+                    oldPrices.putAll(newPrices);
                     p.setPrices(oldPrices);
                     return Mono.just(p);
                 })

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -89,24 +90,23 @@ public class PolygonHandler implements ImportHandler {
 
     private Map<LocalDate, Double> getPreviosEndOfDayPrice(String url) {
         Map<LocalDate, Double> prices = new HashMap<>();
-        Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
-        Map<String, Object> timeSeries = (Map<String, Object>) ((List<Object>) map.get("results")).get(0);
-        if (timeSeries == null) {
-            auditService.saveMessage("invalid request or no data for url " + url, Severity.ERROR, AUDIT_MSG_TYPE);
-            if (map != null && map.containsKey("Error Message")) {
-                auditService.saveMessage("Alphavantage report an error: " + map.get("Error Message"), Severity.ERROR,
-                        AUDIT_MSG_TYPE);
-            }
-        } else {
-            try {
+
+        try{
+            Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
+            Map<String, Object> timeSeries = (Map<String, Object>) ((List<Object>) map.get("results")).get(0);
+            if (timeSeries == null) {
+                auditService.saveMessage("invalid request or no data for url " + url, Severity.ERROR, AUDIT_MSG_TYPE);
+                if (map != null && map.containsKey("Error Message")) {
+                    auditService.saveMessage("Polygon report an error: " + map.get("Error Message"), Severity.ERROR,
+                            AUDIT_MSG_TYPE);
+                }
+            } else{
                 LocalDate date = LocalDate.now().minusDays(1);
                 Double value = Double.parseDouble(timeSeries.get("c").toString());
                 prices.put(date, value);
-
-            } catch (Exception e) {
-                auditService.saveMessage("can not parse value for url " + url,
-                        Severity.ERROR, AUDIT_MSG_TYPE);
             }
+        }catch (Exception e) {
+            auditService.saveMessage("invalid request or no data for url " + url, Severity.ERROR, AUDIT_MSG_TYPE);
         }
         return prices;
     }
@@ -118,9 +118,18 @@ public class PolygonHandler implements ImportHandler {
      */
     public Mono<List<Instrument>> filterInstruments(List<Instrument> instruments, Flux<KeyTsProjection> keyTsFlux) {
         List<Instrument> relevantInstruments = instruments.stream()
-                .filter(i -> i.getInstrumentType().equals(InstrumentType.CURRENCY)
-                        || (i.getAdditionalMaps() != null &&
-                                i.getAdditionalMaps().get(AdditionalMaps.EQUITYSYMBOLS) != null))
+                .filter(i -> (i.getInstrumentType().equals(InstrumentType.CURRENCY) 
+                            && i.getAdditionalProperties() != null 
+                            && i.getAdditionalProperties().get(AdditionalProperties.CURRENCYCODE) != null
+                            && !i.getAdditionalProperties().get(AdditionalProperties.CURRENCYCODE).equals("EUR")
+                        )
+                        || (
+                            i.getAdditionalMaps() != null &&
+                            i.getAdditionalMaps().get(AdditionalMaps.EQUITYSYMBOLS) != null &&
+                            // keep only if NO key contains a dot
+                            i.getAdditionalMaps().get(AdditionalMaps.EQUITYSYMBOLS).keySet().stream().noneMatch(k -> k.contains("."))
+                        )
+                )
                 .collect(Collectors.toList());
 
         return Mono.just(relevantInstruments);
