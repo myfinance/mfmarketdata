@@ -55,7 +55,7 @@ public class AlphavantageHandler implements ImportHandler {
             + SYMBOL_PREFIX;
     public final static String SECURITYMETRICS_URLPOSTFIX = "&apikey=" + ALPHAVANTAGE_API_KEY;
 
-    private static final Integer NUMBER_OF_INSTRUMENT2IMPORT = 5;
+    private static final Integer NUMBER_OF_INSTRUMENT2IMPORT = 20;
     private static final Integer NUMBER_OF_INSTRUMENTMETRICS2IMPORT = 5;
 
     protected static final String AUDIT_MSG_TYPE = "AlphavantageHandler_Event";
@@ -206,7 +206,8 @@ public class AlphavantageHandler implements ImportHandler {
                 // remove in production
                 securityMetrics = importOverview(securityMetrics, symbol);
                 securityMetrics = importCashFlowView(securityMetrics, symbol);
-                // securityMetrics = importIncomeView(securityMetrics, symbol);
+                securityMetrics = importIncomeView(securityMetrics, symbol);
+                securityMetrics = importBalanceView(securityMetrics, symbol);
             }
         }
 
@@ -367,9 +368,10 @@ public class AlphavantageHandler implements ImportHandler {
                 Map<String, String> report = latestAnnualReport.get();
                 returnvalue = setCurrency(symbol, returnvalue, report);
                 returnvalue.setFiscalEndDate(newestAnnualDate);
-                returnvalue.setRevenue(extractDoubleValueFromAnnualReport(report, "totalRevenue"));
-                returnvalue.setNetIncome(extractDoubleValueFromAnnualReport(report, "netIncome")); // corrected from
-                                                                                                   // setRevenue
+                
+                //returnvalue.setRevenue(extractDoubleValueFromAnnualReport(report, "totalRevenue"));
+                returnvalue.setNetIncome(extractDoubleValueFromAnnualReport(report, "netIncome")); 
+                                                                                                  
             }
         }
 
