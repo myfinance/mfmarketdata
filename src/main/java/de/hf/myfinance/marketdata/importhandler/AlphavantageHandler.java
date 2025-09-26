@@ -257,6 +257,7 @@ public class AlphavantageHandler implements ImportHandler {
 
             returnvalue.setTotalAssets(extractValueFromQuarterlyReport(latest4Reports, "totalAssets"));
             returnvalue.setTotalLiabilities(extractValueFromQuarterlyReport(latest4Reports, "totalLiabilities"));
+            returnvalue.setTotalCash(extractValueFromQuarterlyReport(latest4Reports, "cashAndCashEquivalentsAtCarryingValue"));
         } else {
             Optional<Map<String, String>> latestAnnualReport = annualReports.stream()
                     .filter(report -> LocalDate.parse(report.get("fiscalDateEnding")).equals(newestAnnualDate))
@@ -267,9 +268,8 @@ public class AlphavantageHandler implements ImportHandler {
                 returnvalue = setCurrency(symbol, returnvalue, report);
                 returnvalue.setFiscalEndDate(newestAnnualDate);
                 returnvalue.setTotalAssets(extractDoubleValueFromAnnualReport(report, "totalAssets"));
-                returnvalue.setTotalLiabilities(extractDoubleValueFromAnnualReport(report, "totalLiabilities")); // corrected
-                                                                                                                 // from
-                                                                                                                 // setRevenue
+                returnvalue.setTotalLiabilities(extractDoubleValueFromAnnualReport(report, "totalLiabilities")); 
+                returnvalue.setTotalCash(extractDoubleValueFromAnnualReport(report, "cashAndCashEquivalentsAtCarryingValue"));
             }
         }
 
