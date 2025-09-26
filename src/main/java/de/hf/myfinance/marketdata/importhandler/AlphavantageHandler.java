@@ -318,11 +318,18 @@ public class AlphavantageHandler implements ImportHandler {
                 returnvalue = setCurrency(symbol, returnvalue, report);
                 returnvalue.setFiscalEndDate(newestAnnualDate);
                 returnvalue.setOperatingCashflow(extractDoubleValueFromAnnualReport(report, "operatingCashflow"));
-                returnvalue.setCapitalExpenditures(extractDoubleValueFromAnnualReport(report, "capitalExpenditures")); // corrected
-                                                                                                                       // from
-                                                                                                                       // setRevenue
+                returnvalue.setCapitalExpenditures(extractDoubleValueFromAnnualReport(report, "capitalExpenditures")); 
             }
         }
+
+        Map<Integer, Double> historicalFCF = new HashMap<>();
+        annualReports.forEach(report -> {
+            var date = LocalDate.parse(report.get("fiscalDateEnding"));
+            var operatingCashflow = extractDoubleValueFromAnnualReport(report, "operatingCashflow");
+            var capitalExpenditures = extractDoubleValueFromAnnualReport(report, "capitalExpenditures");
+            historicalFCF.put(date.getYear(), operatingCashflow-capitalExpenditures);
+        });
+        returnvalue.setHistoricalFreeCashflow(historicalFCF);
 
         return returnvalue;
     }
@@ -375,12 +382,12 @@ public class AlphavantageHandler implements ImportHandler {
             }
         }
 
-        Map<LocalDate, Double> historicalRevenue = new HashMap<>();
-        Map<LocalDate, Double> historicalNetIncome = new HashMap<>();
+        Map<Integer, Double> historicalRevenue = new HashMap<>();
+        Map<Integer, Double> historicalNetIncome = new HashMap<>();
         annualReports.forEach(report -> {
             var date = LocalDate.parse(report.get("fiscalDateEnding"));
-            historicalRevenue.put(date, extractDoubleValueFromAnnualReport(report, "totalRevenue"));
-            historicalNetIncome.put(date, extractDoubleValueFromAnnualReport(report, "netIncome"));
+            historicalRevenue.put(date.getYear(), extractDoubleValueFromAnnualReport(report, "totalRevenue"));
+            historicalNetIncome.put(date.getYear(), extractDoubleValueFromAnnualReport(report, "netIncome"));
         });
         returnvalue.setHistoricalRevenue(historicalRevenue);
         returnvalue.setHistoricalNetIncome(historicalNetIncome);

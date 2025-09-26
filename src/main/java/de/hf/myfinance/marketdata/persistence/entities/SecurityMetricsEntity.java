@@ -61,6 +61,9 @@ public class SecurityMetricsEntity {
 
     //calculated
     Double freeCashflow;
+    Double expectedFreeCashflow;
+    Double avgFreeCashflow5Y;
+    Double avgFreeCashflowGrowth5Y;
     Double pe;
     Double roa;
     Double debtToAssets;
@@ -68,15 +71,16 @@ public class SecurityMetricsEntity {
     Double dividendPayoutRatio;
     Double intrinsicValue;
     Double intrinsicValueMargin;
+    Double intrinsicValueEVMargin;
     Double lynchScore;
-    Double avgHistoricalFCFGrowthRate;
     Double revenueGrowthRate;
     Double eps;
 
     //historical map<fiscalaenddate, value>. fiscalaenddate is a Date, the values are TTM(trailing twelve month) values
-    Map<LocalDate, Double> historicalRevenue;
-    Map<LocalDate, Double> historicalNetIncome;
-    Map<LocalDate, Double> historicalFreeCashflow;
+    Map<Integer, Double> historicalRevenue;
+    Map<Integer, Double> historicalNetIncome;
+    Map<Integer, Double> historicalFreeCashflow;
+    Map<Integer, Double> expectedFreeCashflowPerYear;
 
     public String getBusinesskey() {
         return this.businesskey;
@@ -334,46 +338,13 @@ public class SecurityMetricsEntity {
         this.lynchScore = lynchScore;
     }
 
-    public Double getAvgHistoricalFCFGrowthRate() {
-        return this.avgHistoricalFCFGrowthRate;
-    }
-
-    public void setAvgHistoricalFCFGrowthRate(Double avgHistoricalFCFGrowthRate) {
-        this.avgHistoricalFCFGrowthRate = avgHistoricalFCFGrowthRate;
-    }
-
     public Double getRevenueGrowthRate() {
         return this.revenueGrowthRate;
     }
 
     public void setRevenueGrowthRate(Double revenueGrowthRate) {
         this.revenueGrowthRate = revenueGrowthRate;
-    }
-
-    public Map<LocalDate,Double> getHistoricalRevenue() {
-        return this.historicalRevenue;
-    }
-
-    public void setHistoricalRevenue(Map<LocalDate,Double> historicalRevenue) {
-        this.historicalRevenue = historicalRevenue;
-    }
-
-    public Map<LocalDate,Double> getHistoricalNetIncome() {
-        return this.historicalNetIncome;
-    }
-
-    public void setHistoricalNetIncome(Map<LocalDate,Double> historicalNetIncome) {
-        this.historicalNetIncome = historicalNetIncome;
-    }
-
-    public Map<LocalDate,Double> getHistoricalFreeCashflow() {
-        return this.historicalFreeCashflow;
-    }
-
-    public void setHistoricalFreeCashflow(Map<LocalDate,Double> historicalFreeCashflow) {
-        this.historicalFreeCashflow = historicalFreeCashflow;
-    }
-    
+    }    
 
     public String getDescription() {
         return this.description;
@@ -440,6 +411,70 @@ public class SecurityMetricsEntity {
 
     public void setVersion(Integer version) {
         this.version = version;
+    }
+
+    public Double getExpectedFreeCashflow() {
+        return this.expectedFreeCashflow;
+    }
+
+    public void setExpectedFreeCashflow(Double expectedFreeCashflow) {
+        this.expectedFreeCashflow = expectedFreeCashflow;
+    }
+
+    public Double getAvgFreeCashflow5Y() {
+        return this.avgFreeCashflow5Y;
+    }
+
+    public void setAvgFreeCashflow5Y(Double avgFreeCashflow5Y) {
+        this.avgFreeCashflow5Y = avgFreeCashflow5Y;
+    }
+
+    public Double getAvgFreeCashflowGrowth5Y() {
+        return this.avgFreeCashflowGrowth5Y;
+    }
+
+    public void setAvgFreeCashflowGrowth5Y(Double avgFreeCashflowGrowth5Y) {
+        this.avgFreeCashflowGrowth5Y = avgFreeCashflowGrowth5Y;
+    }
+
+    public Double getIntrinsicValueEVMargin() {
+        return this.intrinsicValueEVMargin;
+    }
+
+    public void setIntrinsicValueEVMargin(Double intrinsicValueEVMargin) {
+        this.intrinsicValueEVMargin = intrinsicValueEVMargin;
+    }
+
+    public Map<Integer,Double> getHistoricalRevenue() {
+        return this.historicalRevenue;
+    }
+
+    public void setHistoricalRevenue(Map<Integer,Double> historicalRevenue) {
+        this.historicalRevenue = historicalRevenue;
+    }
+
+    public Map<Integer,Double> getHistoricalNetIncome() {
+        return this.historicalNetIncome;
+    }
+
+    public void setHistoricalNetIncome(Map<Integer,Double> historicalNetIncome) {
+        this.historicalNetIncome = historicalNetIncome;
+    }
+
+    public Map<Integer,Double> getHistoricalFreeCashflow() {
+        return this.historicalFreeCashflow;
+    }
+
+    public void setHistoricalFreeCashflow(Map<Integer,Double> historicalFreeCashflow) {
+        this.historicalFreeCashflow = historicalFreeCashflow;
+    }
+
+    public Map<Integer,Double> getExpectedFreeCashflowPerYear() {
+        return this.expectedFreeCashflowPerYear;
+    }
+
+    public void setExpectedFreeCashflowPerYear(Map<Integer,Double> expectedFreeCashflowPerYear) {
+        this.expectedFreeCashflowPerYear = expectedFreeCashflowPerYear;
     }
 
 }
