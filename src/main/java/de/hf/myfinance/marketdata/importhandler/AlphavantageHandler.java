@@ -246,18 +246,18 @@ public class AlphavantageHandler implements ImportHandler {
 
         if (newestQuarterlyDate.isAfter(newestAnnualDate)) {
 
-            var latestQuarterlyReport = quarterlyReports.stream()
+            Optional<Map<String, String>> latestQuarterlyReport = quarterlyReports.stream()
                     .filter(report -> LocalDate.parse(report.get("fiscalDateEnding")).equals(newestAnnualDate))
-                    .findFirst().get();
+                    .findFirst();
+            Map<String, String> report = latestQuarterlyReport.get();
 
-            returnvalue = setCurrency(symbol, returnvalue, latestQuarterlyReport);
+            returnvalue = setCurrency(symbol, returnvalue, report);
 
-            List<Map<String, String>> latest4Reports = getLatest4Reports(quarterlyReports);
             returnvalue.setFiscalEndDate(newestQuarterlyDate);
 
-            returnvalue.setTotalAssets(extractValueFromQuarterlyReport(latest4Reports, "totalAssets"));
-            returnvalue.setTotalLiabilities(extractValueFromQuarterlyReport(latest4Reports, "totalLiabilities"));
-            returnvalue.setTotalCash(extractValueFromQuarterlyReport(latest4Reports, "cashAndCashEquivalentsAtCarryingValue"));
+            returnvalue.setTotalAssets(extractDoubleValueFromReport(report, "totalAssets"));
+            returnvalue.setTotalLiabilities(extractDoubleValueFromReport(report, "totalLiabilities"));
+            returnvalue.setTotalCash(extractDoubleValueFromReport(report, "cashAndCashEquivalentsAtCarryingValue"));
         } else {
             Optional<Map<String, String>> latestAnnualReport = annualReports.stream()
                     .filter(report -> LocalDate.parse(report.get("fiscalDateEnding")).equals(newestAnnualDate))
@@ -267,9 +267,9 @@ public class AlphavantageHandler implements ImportHandler {
                 Map<String, String> report = latestAnnualReport.get();
                 returnvalue = setCurrency(symbol, returnvalue, report);
                 returnvalue.setFiscalEndDate(newestAnnualDate);
-                returnvalue.setTotalAssets(extractDoubleValueFromAnnualReport(report, "totalAssets"));
-                returnvalue.setTotalLiabilities(extractDoubleValueFromAnnualReport(report, "totalLiabilities")); 
-                returnvalue.setTotalCash(extractDoubleValueFromAnnualReport(report, "cashAndCashEquivalentsAtCarryingValue"));
+                returnvalue.setTotalAssets(extractDoubleValueFromReport(report, "totalAssets"));
+                returnvalue.setTotalLiabilities(extractDoubleValueFromReport(report, "totalLiabilities")); 
+                returnvalue.setTotalCash(extractDoubleValueFromReport(report, "cashAndCashEquivalentsAtCarryingValue"));
             }
         }
 
@@ -306,8 +306,8 @@ public class AlphavantageHandler implements ImportHandler {
             List<Map<String, String>> latest4Reports = getLatest4Reports(quarterlyReports);
             returnvalue.setFiscalEndDate(newestQuarterlyDate);
 
-            returnvalue.setOperatingCashflow(extractValueFromQuarterlyReport(latest4Reports, "operatingCashflow"));
-            returnvalue.setCapitalExpenditures(extractValueFromQuarterlyReport(latest4Reports, "capitalExpenditures"));
+            returnvalue.setOperatingCashflow(extractAndAggragateValueFromLast4Reports(latest4Reports, "operatingCashflow"));
+            returnvalue.setCapitalExpenditures(extractAndAggragateValueFromLast4Reports(latest4Reports, "capitalExpenditures"));
         } else {
             Optional<Map<String, String>> latestAnnualReport = annualReports.stream()
                     .filter(report -> LocalDate.parse(report.get("fiscalDateEnding")).equals(newestAnnualDate))
@@ -317,16 +317,16 @@ public class AlphavantageHandler implements ImportHandler {
                 Map<String, String> report = latestAnnualReport.get();
                 returnvalue = setCurrency(symbol, returnvalue, report);
                 returnvalue.setFiscalEndDate(newestAnnualDate);
-                returnvalue.setOperatingCashflow(extractDoubleValueFromAnnualReport(report, "operatingCashflow"));
-                returnvalue.setCapitalExpenditures(extractDoubleValueFromAnnualReport(report, "capitalExpenditures")); 
+                returnvalue.setOperatingCashflow(extractDoubleValueFromReport(report, "operatingCashflow"));
+                returnvalue.setCapitalExpenditures(extractDoubleValueFromReport(report, "capitalExpenditures")); 
             }
         }
 
         Map<Integer, Double> historicalFCF = new HashMap<>();
         annualReports.forEach(report -> {
             var date = LocalDate.parse(report.get("fiscalDateEnding"));
-            var operatingCashflow = extractDoubleValueFromAnnualReport(report, "operatingCashflow");
-            var capitalExpenditures = extractDoubleValueFromAnnualReport(report, "capitalExpenditures");
+            var operatingCashflow = extractDoubleValueFromReport(report, "operatingCashflow");
+            var capitalExpenditures = extractDoubleValueFromReport(report, "capitalExpenditures");
             historicalFCF.put(date.getYear(), operatingCashflow-capitalExpenditures);
         });
         returnvalue.setHistoricalFreeCashflow(historicalFCF);
@@ -364,8 +364,8 @@ public class AlphavantageHandler implements ImportHandler {
             List<Map<String, String>> latest4Reports = getLatest4Reports(quarterlyReports);
             returnvalue.setFiscalEndDate(newestQuarterlyDate);
 
-            returnvalue.setRevenue(extractValueFromQuarterlyReport(latest4Reports, "totalRevenue"));
-            returnvalue.setNetIncome(extractValueFromQuarterlyReport(latest4Reports, "netIncome"));
+            returnvalue.setRevenue(extractAndAggragateValueFromLast4Reports(latest4Reports, "totalRevenue"));
+            returnvalue.setNetIncome(extractAndAggragateValueFromLast4Reports(latest4Reports, "netIncome"));
         } else {
             Optional<Map<String, String>> latestAnnualReport = annualReports.stream()
                     .filter(report -> LocalDate.parse(report.get("fiscalDateEnding")).equals(newestAnnualDate))
@@ -377,7 +377,7 @@ public class AlphavantageHandler implements ImportHandler {
                 returnvalue.setFiscalEndDate(newestAnnualDate);
                 
                 //returnvalue.setRevenue(extractDoubleValueFromAnnualReport(report, "totalRevenue"));
-                returnvalue.setNetIncome(extractDoubleValueFromAnnualReport(report, "netIncome")); 
+                returnvalue.setNetIncome(extractDoubleValueFromReport(report, "netIncome")); 
                                                                                                   
             }
         }
@@ -386,8 +386,8 @@ public class AlphavantageHandler implements ImportHandler {
         Map<Integer, Double> historicalNetIncome = new HashMap<>();
         annualReports.forEach(report -> {
             var date = LocalDate.parse(report.get("fiscalDateEnding"));
-            historicalRevenue.put(date.getYear(), extractDoubleValueFromAnnualReport(report, "totalRevenue"));
-            historicalNetIncome.put(date.getYear(), extractDoubleValueFromAnnualReport(report, "netIncome"));
+            historicalRevenue.put(date.getYear(), extractDoubleValueFromReport(report, "totalRevenue"));
+            historicalNetIncome.put(date.getYear(), extractDoubleValueFromReport(report, "netIncome"));
         });
         returnvalue.setHistoricalRevenue(historicalRevenue);
         returnvalue.setHistoricalNetIncome(historicalNetIncome);
@@ -405,11 +405,11 @@ public class AlphavantageHandler implements ImportHandler {
         return returnvalue;
     }
 
-    private double extractDoubleValueFromAnnualReport(Map<String, String> report, String propertyKey) {
+    private double extractDoubleValueFromReport(Map<String, String> report, String propertyKey) {
         return parseDouble(report.get(propertyKey));
     }
 
-    private double extractValueFromQuarterlyReport(List<Map<String, String>> latest4Reports, String propertyKey) {
+    private double extractAndAggragateValueFromLast4Reports(List<Map<String, String>> latest4Reports, String propertyKey) {
         return latest4Reports.stream()
                 .mapToDouble(report -> parseDouble(report.get(propertyKey)))
                 .sum();
