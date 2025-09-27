@@ -46,6 +46,7 @@ public class SecurityMetricsEntity {
     //optional
     Double totalAssets;
     Double totalLiabilities;
+    Double totalCash;
     Double dilutedEPS5Y;
     Double dividendPerShare;
     Double forwardFreeCashflow5YCAGR;
@@ -61,8 +62,11 @@ public class SecurityMetricsEntity {
 
     //calculated
     Double freeCashflow;
+    //expected free cashflow, baseline for the intrinsic value calculation, it is the average of the last 5 years free cashflow or the last year free cashflow if not enough historical data is available or in case the FCF is bigger than the avg
     Double expectedFreeCashflow;
+    //average of the last 5 years free cashflow
     Double avgFreeCashflow5Y;
+    //average growth of the free cashflow in the last 5 years
     Double avgFreeCashflowGrowth5Y;
     Double pe;
     Double roa;
@@ -71,16 +75,26 @@ public class SecurityMetricsEntity {
     Double dividendPayoutRatio;
     Double intrinsicValue;
     Double intrinsicValueMargin;
+    //intrinsic value / enterprice value per share
     Double intrinsicValueEVMargin;
     Double lynchScore;
     Double revenueGrowthRate;
     Double eps;
 
-    //historical map<fiscalaenddate, value>. fiscalaenddate is a Date, the values are TTM(trailing twelve month) values
+    //config
+    Double avgMarktcapFreeCashflowRatio;
+    //durchschnitt in den nächsten 10 Jahren erwartetes Wachstum des Free Cashflows
+    //this is used to calculate the intrinsic value
+    //it is the average of next 10 years of the FreeCashflow growth rate
+    // notation e.g. 1.4 means 40% growth
+    Double expectedCashflowGrowth;
+
+    //historical map<year of fiscalaenddate, value>. fiscalaenddate is a Date, the values are TTM(trailing twelve month) values
     Map<Integer, Double> historicalRevenue;
     Map<Integer, Double> historicalNetIncome;
     Map<Integer, Double> historicalFreeCashflow;
-    Map<Integer, Double> expectedFreeCashflowPerYear;
+    Map<Integer, Double> expectedFreeCashflowPerYear;// the keys are 1..10 for the next 10 years. Year 1 is next year, so the value is the expectedFreeCashflowfor this year (or the current FCF)* (1+expectedCashflowGrowth)
+
 
     public String getBusinesskey() {
         return this.businesskey;
@@ -475,6 +489,30 @@ public class SecurityMetricsEntity {
 
     public void setExpectedFreeCashflowPerYear(Map<Integer,Double> expectedFreeCashflowPerYear) {
         this.expectedFreeCashflowPerYear = expectedFreeCashflowPerYear;
+    }
+
+    public Double getTotalCash() {
+        return this.totalCash;
+    }
+
+    public void setTotalCash(Double totalCash) {
+        this.totalCash = totalCash;
+    }
+
+    public Double getAvgMarktcapFreeCashflowRatio() {
+        return this.avgMarktcapFreeCashflowRatio;
+    }
+
+    public void setAvgMarktcapFreeCashflowRatio(Double avgMarktcapFreeCashflowRatio) {
+        this.avgMarktcapFreeCashflowRatio = avgMarktcapFreeCashflowRatio;
+    }
+
+    public Double getExpectedCashflowGrowth() {
+        return this.expectedCashflowGrowth;
+    }
+
+    public void setExpectedCashflowGrowth(Double expectedCashflowGrowth) {
+        this.expectedCashflowGrowth = expectedCashflowGrowth;
     }
 
 }
