@@ -257,6 +257,7 @@ public class AlphavantageHandler implements ImportHandler {
 
             returnvalue.setTotalAssets(extractDoubleValueFromReport(report, "totalAssets"));
             returnvalue.setTotalLiabilities(extractDoubleValueFromReport(report, "totalLiabilities"));
+            returnvalue.setShortLongTermDebtTotal(extractDoubleValueFromReport(report, "shortLongTermDebtTotal"));
             returnvalue.setTotalCash(extractDoubleValueFromReport(report, "cashAndCashEquivalentsAtCarryingValue"));
         } else {
             Optional<Map<String, String>> latestAnnualReport = annualReports.stream()
@@ -269,6 +270,7 @@ public class AlphavantageHandler implements ImportHandler {
                 returnvalue.setFiscalEndDate(newestAnnualDate);
                 returnvalue.setTotalAssets(extractDoubleValueFromReport(report, "totalAssets"));
                 returnvalue.setTotalLiabilities(extractDoubleValueFromReport(report, "totalLiabilities")); 
+                returnvalue.setShortLongTermDebtTotal(extractDoubleValueFromReport(report, "shortLongTermDebtTotal")); 
                 returnvalue.setTotalCash(extractDoubleValueFromReport(report, "cashAndCashEquivalentsAtCarryingValue"));
             }
         }
