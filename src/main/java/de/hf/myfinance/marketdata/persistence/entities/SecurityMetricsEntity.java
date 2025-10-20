@@ -46,6 +46,7 @@ public class SecurityMetricsEntity {
     //optional
     Double totalAssets;
     Double totalLiabilities;
+    Double shortLongTermDebtTotal;
     Double totalCash;
     Double dilutedEPS5Y;
     Double dividendPerShare;
@@ -514,5 +515,15 @@ public class SecurityMetricsEntity {
     public void setExpectedCashflowGrowth(Double expectedCashflowGrowth) {
         this.expectedCashflowGrowth = expectedCashflowGrowth;
     }
+
+
+    public Double getShortLongTermDebtTotal() {
+        return this.shortLongTermDebtTotal;
+    }
+
+    public void setShortLongTermDebtTotal(Double shortLongTermDebtTotal) {
+        this.shortLongTermDebtTotal = shortLongTermDebtTotal;
+    }
+
 
 }
