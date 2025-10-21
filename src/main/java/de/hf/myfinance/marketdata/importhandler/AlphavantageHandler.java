@@ -259,6 +259,9 @@ public class AlphavantageHandler implements ImportHandler {
             returnvalue.setTotalLiabilities(extractDoubleValueFromReport(report, "totalLiabilities"));
             returnvalue.setShortLongTermDebtTotal(extractDoubleValueFromReport(report, "shortLongTermDebtTotal"));
             returnvalue.setTotalCash(extractDoubleValueFromReport(report, "cashAndCashEquivalentsAtCarryingValue"));
+            returnvalue.setGoodwill(extractDoubleValueFromReport(report, "goodwill"));
+            returnvalue.setTotalEquity(extractDoubleValueFromReport(report, "totalShareholderEquity"));
+            returnvalue.setCurrentLiabilities(extractDoubleValueFromReport(report, "totalCurrentLiabilities"));
         } else {
             Optional<Map<String, String>> latestAnnualReport = annualReports.stream()
                     .filter(report -> LocalDate.parse(report.get("fiscalDateEnding")).equals(newestAnnualDate))
@@ -272,6 +275,9 @@ public class AlphavantageHandler implements ImportHandler {
                 returnvalue.setTotalLiabilities(extractDoubleValueFromReport(report, "totalLiabilities")); 
                 returnvalue.setShortLongTermDebtTotal(extractDoubleValueFromReport(report, "shortLongTermDebtTotal")); 
                 returnvalue.setTotalCash(extractDoubleValueFromReport(report, "cashAndCashEquivalentsAtCarryingValue"));
+                returnvalue.setGoodwill(extractDoubleValueFromReport(report, "goodwill"));
+                returnvalue.setTotalEquity(extractDoubleValueFromReport(report, "totalShareholderEquity"));
+                returnvalue.setCurrentLiabilities(extractDoubleValueFromReport(report, "totalCurrentLiabilities"));
             }
         }
 
@@ -367,7 +373,9 @@ public class AlphavantageHandler implements ImportHandler {
             returnvalue.setFiscalEndDate(newestQuarterlyDate);
 
             returnvalue.setRevenue(extractAndAggragateValueFromLast4Reports(latest4Reports, "totalRevenue"));
-            returnvalue.setNetIncome(extractAndAggragateValueFromLast4Reports(latest4Reports, "netIncome"));
+            returnvalue.setEbit(extractAndAggragateValueFromLast4Reports(latest4Reports, "ebit"));
+            returnvalue.setEbitda(extractAndAggragateValueFromLast4Reports(latest4Reports, "ebitda"));
+            returnvalue.setGrossProfit(extractAndAggragateValueFromLast4Reports(latest4Reports, "grossProfit"));
         } else {
             Optional<Map<String, String>> latestAnnualReport = annualReports.stream()
                     .filter(report -> LocalDate.parse(report.get("fiscalDateEnding")).equals(newestAnnualDate))
@@ -378,9 +386,10 @@ public class AlphavantageHandler implements ImportHandler {
                 returnvalue = setCurrency(symbol, returnvalue, report);
                 returnvalue.setFiscalEndDate(newestAnnualDate);
                 
-                //returnvalue.setRevenue(extractDoubleValueFromAnnualReport(report, "totalRevenue"));
-                returnvalue.setNetIncome(extractDoubleValueFromReport(report, "netIncome")); 
-                                                                                                  
+                returnvalue.setRevenue(extractDoubleValueFromReport(report, "totalRevenue"));
+                returnvalue.setEbit(extractDoubleValueFromReport(report, "ebit"));
+                returnvalue.setEbitda(extractDoubleValueFromReport(report, "ebitda"));
+                returnvalue.setGrossProfit(extractDoubleValueFromReport(report, "grossProfit"));                                                                                 
             }
         }
 
@@ -453,6 +462,7 @@ public class AlphavantageHandler implements ImportHandler {
         if (map != null && !map.isEmpty()) {
             returnvalue.setCurrencyCode(map.get("Currency").toString());
             returnvalue.setSector(map.get("Sector").toString());
+            returnvalue.setCountry(map.get("Country").toString());
             returnvalue.setDividendPerShare(extractDoubleValue("DividendPerShare", map));
             returnvalue.setEps(extractDoubleValue("EPS", map));
             returnvalue.setSharesOutstanding(extractDoubleValue("SharesOutstanding", map));
