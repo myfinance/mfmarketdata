@@ -30,6 +30,7 @@ public class SecurityMetricsEntity {
     SecurityLifecyclePhase securityLifecyclePhase;
     RiskProfile riskProfile;
     String sector;
+    String country;
     LocalDateTime lastUpdateTs;
 
 
@@ -55,9 +56,12 @@ public class SecurityMetricsEntity {
     Double beta;
     Double tam;
     Double forwardPE;
-    Double minForwardFCF10YCAGR;
-    Double avgForwardFCF10YCAGR;
-    Double maxForwardFCF10YCAGR;
+    Double goodwill; 
+    Double ebitda;
+    Double ebit;
+    Double grossProfit;
+    Double totalEquity;
+    Double currentLiabilities;
     
 
 
@@ -71,6 +75,10 @@ public class SecurityMetricsEntity {
     Double avgFreeCashflowGrowth5Y;
     Double pe;
     Double roa;
+    //return on equity
+    Double roe;
+    //ReturnOnCapitalEmployed (ROCE) = EBIT/(Assets-currentLiabilities)
+    Double roce;
     Double debtToAssets;
     Double dividendYield;
     Double dividendPayoutRatio;
@@ -255,30 +263,6 @@ public class SecurityMetricsEntity {
 
     public void setForwardPE(Double forwardPE) {
         this.forwardPE = forwardPE;
-    }
-
-    public Double getMinForwardFCF10YCAGR() {
-        return this.minForwardFCF10YCAGR;
-    }
-
-    public void setMinForwardFCF10YCAGR(Double minForwardFCF10YCAGR) {
-        this.minForwardFCF10YCAGR = minForwardFCF10YCAGR;
-    }
-
-    public Double getAvgForwardFCF10YCAGR() {
-        return this.avgForwardFCF10YCAGR;
-    }
-
-    public void setAvgForwardFCF10YCAGR(Double avgForwardFCF10YCAGR) {
-        this.avgForwardFCF10YCAGR = avgForwardFCF10YCAGR;
-    }
-
-    public Double getMaxForwardFCF10YCAGR() {
-        return this.maxForwardFCF10YCAGR;
-    }
-
-    public void setMaxForwardFCF10YCAGR(Double maxForwardFCF10YCAGR) {
-        this.maxForwardFCF10YCAGR = maxForwardFCF10YCAGR;
     }
 
     public Double getNetIncome() {
@@ -516,7 +500,6 @@ public class SecurityMetricsEntity {
         this.expectedCashflowGrowth = expectedCashflowGrowth;
     }
 
-
     public Double getShortLongTermDebtTotal() {
         return this.shortLongTermDebtTotal;
     }
@@ -525,5 +508,77 @@ public class SecurityMetricsEntity {
         this.shortLongTermDebtTotal = shortLongTermDebtTotal;
     }
 
+
+    public String getCountry() {
+        return this.country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public Double getGoodwill() {
+        return this.goodwill;
+    }
+
+    public void setGoodwill(Double goodwill) {
+        this.goodwill = goodwill;
+    }
+
+    public Double getEbitda() {
+        return this.ebitda;
+    }
+
+    public void setEbitda(Double ebitda) {
+        this.ebitda = ebitda;
+    }
+
+    public Double getEbit() {
+        return this.ebit;
+    }
+
+    public void setEbit(Double ebit) {
+        this.ebit = ebit;
+    }
+
+    public Double getGrossProfit() {
+        return this.grossProfit;
+    }
+
+    public void setGrossProfit(Double grossProfit) {
+        this.grossProfit = grossProfit;
+    }
+
+    public Double getTotalEquity() {
+        return this.totalEquity;
+    }
+
+    public void setTotalEquity(Double totalEquity) {
+        this.totalEquity = totalEquity;
+    }
+
+    public Double getCurrentLiabilities() {
+        return this.currentLiabilities;
+    }
+
+    public void setCurrentLiabilities(Double currentLiabilities) {
+        this.currentLiabilities = currentLiabilities;
+    }
+
+    public Double getRoe() {
+        return this.roe;
+    }
+
+    public void setRoe(Double roe) {
+        this.roe = roe;
+    }
+
+    public Double getRoce() {
+        return this.roce;
+    }
+
+    public void setRoce(Double roce) {
+        this.roce = roce;
+    }
 
 }
