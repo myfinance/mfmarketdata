@@ -302,6 +302,14 @@ public class AlphavantageHandler implements ImportHandler {
 
         LocalDate newestAnnualDate = getNewestAnnualDate(annualReports);
         LocalDate newestQuarterlyDate = getNewestQuarterlyDate(quarterlyReports);
+        Map<String, String> newestAnnualReport = new HashMap<>();
+        var reportOptional = annualReports.stream()
+                    .filter(report -> LocalDate.parse(report.get("fiscalDateEnding")).equals(newestAnnualDate))
+                    .findFirst();
+        if (reportOptional.isPresent()) {
+            newestAnnualReport = reportOptional.get();
+            returnvalue.setHasDividendsOrBuyBacks(getHasDividendsOrBuyBacks(newestAnnualReport));
+        }
 
         if (newestQuarterlyDate.isAfter(newestAnnualDate)) {
 
@@ -313,23 +321,15 @@ public class AlphavantageHandler implements ImportHandler {
 
             List<Map<String, String>> latest4Reports = getLatest4Reports(quarterlyReports);
             returnvalue.setFiscalEndDate(newestQuarterlyDate);
-
             returnvalue.setOperatingCashflow(extractAndAggragateValueFromLast4Reports(latest4Reports, "operatingCashflow"));
             returnvalue.setCapitalExpenditures(extractAndAggragateValueFromLast4Reports(latest4Reports, "capitalExpenditures"));
         } else {
-            Optional<Map<String, String>> latestAnnualReport = annualReports.stream()
-                    .filter(report -> LocalDate.parse(report.get("fiscalDateEnding")).equals(newestAnnualDate))
-                    .findFirst();
-
-            if (latestAnnualReport.isPresent()) {
-                Map<String, String> report = latestAnnualReport.get();
-                returnvalue = setCurrency(symbol, returnvalue, report);
-                returnvalue.setFiscalEndDate(newestAnnualDate);
-                returnvalue.setOperatingCashflow(extractDoubleValueFromReport(report, "operatingCashflow"));
-                returnvalue.setCapitalExpenditures(extractDoubleValueFromReport(report, "capitalExpenditures")); 
-            }
+            returnvalue = setCurrency(symbol, returnvalue, newestAnnualReport);
+            returnvalue.setFiscalEndDate(newestAnnualDate);
+            returnvalue.setOperatingCashflow(extractDoubleValueFromReport(newestAnnualReport, "operatingCashflow"));
+            returnvalue.setCapitalExpenditures(extractDoubleValueFromReport(newestAnnualReport, "capitalExpenditures")); 
         }
-
+        
         Map<Integer, Double> historicalFCF = new HashMap<>();
         annualReports.forEach(report -> {
             var date = LocalDate.parse(report.get("fiscalDateEnding"));
@@ -340,6 +340,22 @@ public class AlphavantageHandler implements ImportHandler {
         returnvalue.setHistoricalFreeCashflow(historicalFCF);
 
         return returnvalue;
+    }
+
+    private Boolean getHasDividendsOrBuyBacks(Map<String, String> report) {
+        var paymentsForRepurchaseOfCommonStock = report.get("paymentsForRepurchaseOfCommonStock");
+        var paymentsForRepurchaseOfEquity = report.get("paymentsForRepurchaseOfEquity");
+        var paymentsForRepurchaseOfPreferredStock = report.get("paymentsForRepurchaseOfPreferredStock");
+        var dividendPayout = report.get("dividendPayout");
+        if(
+            (paymentsForRepurchaseOfCommonStock!=null && !paymentsForRepurchaseOfCommonStock.equals("None"))||
+            (paymentsForRepurchaseOfEquity!=null && !paymentsForRepurchaseOfEquity.equals("None"))||
+            (paymentsForRepurchaseOfPreferredStock!=null && !paymentsForRepurchaseOfPreferredStock.equals("None"))||
+            (dividendPayout!=null && !dividendPayout.equals("None"))
+        ){
+            return true;
+        } 
+        return false;
     }
 
     private SecurityMetrics importIncomeView(SecurityMetrics securityMetrics, String symbol) {
@@ -376,6 +392,7 @@ public class AlphavantageHandler implements ImportHandler {
             returnvalue.setEbit(extractAndAggragateValueFromLast4Reports(latest4Reports, "ebit"));
             returnvalue.setEbitda(extractAndAggragateValueFromLast4Reports(latest4Reports, "ebitda"));
             returnvalue.setGrossProfit(extractAndAggragateValueFromLast4Reports(latest4Reports, "grossProfit"));
+            returnvalue.setOperatingIncome(extractAndAggragateValueFromLast4Reports(latest4Reports, "operatingIncome"));
         } else {
             Optional<Map<String, String>> latestAnnualReport = annualReports.stream()
                     .filter(report -> LocalDate.parse(report.get("fiscalDateEnding")).equals(newestAnnualDate))
@@ -389,19 +406,29 @@ public class AlphavantageHandler implements ImportHandler {
                 returnvalue.setRevenue(extractDoubleValueFromReport(report, "totalRevenue"));
                 returnvalue.setEbit(extractDoubleValueFromReport(report, "ebit"));
                 returnvalue.setEbitda(extractDoubleValueFromReport(report, "ebitda"));
-                returnvalue.setGrossProfit(extractDoubleValueFromReport(report, "grossProfit"));                                                                                 
+                returnvalue.setGrossProfit(extractDoubleValueFromReport(report, "grossProfit"));   
+                returnvalue.setOperatingIncome(extractDoubleValueFromReport(report, "operatingIncome"));                                                                                 
             }
         }
 
         Map<Integer, Double> historicalRevenue = new HashMap<>();
         Map<Integer, Double> historicalNetIncome = new HashMap<>();
+        Map<Integer, Double> historicalOperatingIncome = new HashMap<>();
         annualReports.forEach(report -> {
             var date = LocalDate.parse(report.get("fiscalDateEnding"));
             historicalRevenue.put(date.getYear(), extractDoubleValueFromReport(report, "totalRevenue"));
             historicalNetIncome.put(date.getYear(), extractDoubleValueFromReport(report, "netIncome"));
+            historicalOperatingIncome.put(date.getYear(), extractDoubleValueFromReport(report, "operatingIncome"));
         });
+        
         returnvalue.setHistoricalRevenue(historicalRevenue);
         returnvalue.setHistoricalNetIncome(historicalNetIncome);
+        if (historicalOperatingIncome.size() >= 2) {
+            List<Integer> sortedYears = new ArrayList<>(historicalOperatingIncome.keySet());
+            sortedYears.sort(Comparator.reverseOrder());
+            Integer secondNewestYear = sortedYears.get(1);
+            returnvalue.setOperatingIncomeLastYear(historicalOperatingIncome.get(secondNewestYear));
+        } 
         return returnvalue;
     }
 

@@ -43,6 +43,8 @@ public class SecurityMetricsEntity {
     Double capitalExpenditures;
     Double operatingCashflow;
     Double netIncome;
+    Double operatingIncome;
+    Double operatingIncomeLastYear;
 
     //optional
     Double totalAssets;
@@ -62,7 +64,7 @@ public class SecurityMetricsEntity {
     Double grossProfit;
     Double totalEquity;
     Double currentLiabilities;
-    
+    Boolean hasDividendsOrBuyBacks;
 
 
     //calculated
@@ -581,4 +583,33 @@ public class SecurityMetricsEntity {
         this.roce = roce;
     }
 
+
+    public Double getOperatingIncome() {
+        return this.operatingIncome;
+    }
+
+    public void setOperatingIncome(Double operatingIncome) {
+        this.operatingIncome = operatingIncome;
+    }
+
+    public Double getOperatingIncomeLastYear() {
+        return this.operatingIncomeLastYear;
+    }
+
+    public void setOperatingIncomeLastYear(Double operatingIncomeLastYear) {
+        this.operatingIncomeLastYear = operatingIncomeLastYear;
+    }
+
+    public Boolean isHasDividendsOrBuyBacks() {
+        return this.hasDividendsOrBuyBacks;
+    }
+
+    public Boolean getHasDividendsOrBuyBacks() {
+        return this.hasDividendsOrBuyBacks;
+    }
+
+    public void setHasDividendsOrBuyBacks(Boolean hasDividendsOrBuyBacks) {
+        this.hasDividendsOrBuyBacks = hasDividendsOrBuyBacks;
+    }
+   
 }

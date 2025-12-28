@@ -12,12 +12,6 @@ import de.hf.myfinance.restmodel.SecurityMetrics;
 @Mapper(componentModel = "spring")
 public interface SecurityMetricsMapper {
         @Mappings({
-            @Mapping(target = "rankByPE", ignore = true),
-            @Mapping(target = "rankByRoA", ignore = true),
-            @Mapping(target = "rankByRoAAndPE", ignore = true),
-            @Mapping(target = "rankByIntrinsicValueMargin", ignore = true),
-            @Mapping(target = "rankByLynchScore", ignore = true),
-            @Mapping(target = "rankByLynchAndIntrinsicValueMargin", ignore = true)
             })
     SecurityMetrics entityToApi(SecurityMetricsEntity entity);
 
