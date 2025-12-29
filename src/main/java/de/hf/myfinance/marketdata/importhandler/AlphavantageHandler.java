@@ -252,8 +252,9 @@ public class AlphavantageHandler implements ImportHandler {
             Map<String, String> report = latestQuarterlyReport.get();
 
             returnvalue = setCurrency(symbol, returnvalue, report);
-
-            returnvalue.setFiscalEndDate(newestQuarterlyDate);
+            if(returnvalue.getFiscalEndDate() == null){
+                returnvalue.setFiscalEndDate(newestQuarterlyDate);
+            }
 
             returnvalue.setTotalAssets(extractDoubleValueFromReport(report, "totalAssets"));
             returnvalue.setTotalLiabilities(extractDoubleValueFromReport(report, "totalLiabilities"));
@@ -270,7 +271,9 @@ public class AlphavantageHandler implements ImportHandler {
             if (latestAnnualReport.isPresent()) {
                 Map<String, String> report = latestAnnualReport.get();
                 returnvalue = setCurrency(symbol, returnvalue, report);
-                returnvalue.setFiscalEndDate(newestAnnualDate);
+                if(returnvalue.getFiscalEndDate() == null){
+                    returnvalue.setFiscalEndDate(newestAnnualDate);
+                }
                 returnvalue.setTotalAssets(extractDoubleValueFromReport(report, "totalAssets"));
                 returnvalue.setTotalLiabilities(extractDoubleValueFromReport(report, "totalLiabilities")); 
                 returnvalue.setShortLongTermDebtTotal(extractDoubleValueFromReport(report, "shortLongTermDebtTotal")); 
@@ -320,12 +323,16 @@ public class AlphavantageHandler implements ImportHandler {
             returnvalue = setCurrency(symbol, returnvalue, latestQuarterlyReport);
 
             List<Map<String, String>> latest4Reports = getLatest4Reports(quarterlyReports);
-            returnvalue.setFiscalEndDate(newestQuarterlyDate);
+            if(returnvalue.getFiscalEndDate() == null){
+                    returnvalue.setFiscalEndDate(newestQuarterlyDate);
+            }
             returnvalue.setOperatingCashflow(extractAndAggragateValueFromLast4Reports(latest4Reports, "operatingCashflow"));
             returnvalue.setCapitalExpenditures(extractAndAggragateValueFromLast4Reports(latest4Reports, "capitalExpenditures"));
         } else {
             returnvalue = setCurrency(symbol, returnvalue, newestAnnualReport);
-            returnvalue.setFiscalEndDate(newestAnnualDate);
+            if(returnvalue.getFiscalEndDate() == null){
+                returnvalue.setFiscalEndDate(newestAnnualDate);
+            }
             returnvalue.setOperatingCashflow(extractDoubleValueFromReport(newestAnnualReport, "operatingCashflow"));
             returnvalue.setCapitalExpenditures(extractDoubleValueFromReport(newestAnnualReport, "capitalExpenditures")); 
         }
@@ -386,8 +393,9 @@ public class AlphavantageHandler implements ImportHandler {
             returnvalue = setCurrency(symbol, returnvalue, latestQuarterlyReport);
 
             List<Map<String, String>> latest4Reports = getLatest4Reports(quarterlyReports);
-            returnvalue.setFiscalEndDate(newestQuarterlyDate);
-
+            if(returnvalue.getFiscalEndDate() == null){
+                    returnvalue.setFiscalEndDate(newestQuarterlyDate);
+            }
             returnvalue.setRevenue(extractAndAggragateValueFromLast4Reports(latest4Reports, "totalRevenue"));
             returnvalue.setEbit(extractAndAggragateValueFromLast4Reports(latest4Reports, "ebit"));
             returnvalue.setEbitda(extractAndAggragateValueFromLast4Reports(latest4Reports, "ebitda"));
@@ -401,8 +409,9 @@ public class AlphavantageHandler implements ImportHandler {
             if (latestAnnualReport.isPresent()) {
                 Map<String, String> report = latestAnnualReport.get();
                 returnvalue = setCurrency(symbol, returnvalue, report);
-                returnvalue.setFiscalEndDate(newestAnnualDate);
-                
+                if(returnvalue.getFiscalEndDate() == null){
+                    returnvalue.setFiscalEndDate(newestAnnualDate);
+                }
                 returnvalue.setRevenue(extractDoubleValueFromReport(report, "totalRevenue"));
                 returnvalue.setEbit(extractDoubleValueFromReport(report, "ebit"));
                 returnvalue.setEbitda(extractDoubleValueFromReport(report, "ebitda"));
