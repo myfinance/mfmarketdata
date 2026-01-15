@@ -29,10 +29,6 @@ public class WebRequestImpl implements WebRequest {
 
     public String getRequest(String url) throws IOException {
 
-        InputStreamReader inputStream = null;
-        BufferedReader bufferedReader = null;
-        StringBuilder responseBuilder;
-
         URLConnection connection = getUrlConnection(url);
 
         return getResponse(connection).toString();

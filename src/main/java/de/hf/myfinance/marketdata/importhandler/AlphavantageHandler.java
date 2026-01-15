@@ -228,7 +228,7 @@ public class AlphavantageHandler implements ImportHandler {
     private SecurityMetrics importBalanceView(SecurityMetrics securityMetrics, String symbol) {
         var returnvalue = securityMetrics;
         String url = SECURITYMETRICS_BALANCEVIEW_URLPREFIX + symbol + SECURITYMETRICS_URLPOSTFIX;
-        Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
+        Map<String, Object> map = loadData(url);
 
         if (map == null || map.isEmpty()) {
             return returnvalue;
@@ -290,7 +290,7 @@ public class AlphavantageHandler implements ImportHandler {
     private SecurityMetrics importCashFlowView(SecurityMetrics securityMetrics, String symbol) {
         var returnvalue = securityMetrics;
         String url = SECURITYMETRICS_CASHFLOWVIEW_URLPREFIX + symbol + SECURITYMETRICS_URLPOSTFIX;
-        Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
+        Map<String, Object> map = loadData(url);
 
         if (map == null || map.isEmpty()) {
             return returnvalue;
@@ -365,10 +365,27 @@ public class AlphavantageHandler implements ImportHandler {
         return false;
     }
 
+    private Map<String, Object> loadData(String url) {
+        Map<String, Object> map = null;
+        var retryCount = 0;
+        while(map==null && retryCount<3){
+            if(retryCount>0 ){
+                try {
+                    Thread.sleep(5000 * retryCount); // Exponential backoff
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            retryCount++;
+            map = webRequest.getJsonMapFromUrl(url);
+        }
+        return map;
+    }
+
     private SecurityMetrics importIncomeView(SecurityMetrics securityMetrics, String symbol) {
         var returnvalue = securityMetrics;
         String url = SECURITYMETRICS_INCOMEVIEW_URLPREFIX + symbol + SECURITYMETRICS_URLPOSTFIX;
-        Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
+        Map<String, Object> map = loadData(url);
 
         if (map == null || map.isEmpty()) {
             return returnvalue;
@@ -494,7 +511,7 @@ public class AlphavantageHandler implements ImportHandler {
     private SecurityMetrics importOverview(SecurityMetrics securityMetrics, String symbol) {
         var returnvalue = securityMetrics;
         String url = SECURITYMETRICS_OVERVIEW_URLPREFIX + symbol + SECURITYMETRICS_URLPOSTFIX;
-        Map<String, Object> map = webRequest.getJsonMapFromUrl(url);
+        Map<String, Object> map = loadData(url);
         if (map != null && !map.isEmpty()) {
             returnvalue.setCurrencyCode(map.get("Currency").toString());
             returnvalue.setSector(map.get("Sector").toString());
