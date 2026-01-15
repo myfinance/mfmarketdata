@@ -372,7 +372,12 @@ public class AlphavantageHandler implements ImportHandler {
         Map<String, Object> map = null;
         var retryCount = 0;
         while(map==null && retryCount<MAXRETRYCOUNT){
-
+            //wait before request - only 1 per second allowed
+            try {
+                Thread.sleep(SLEEPTIMEBEFORERETRY); 
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
             map = webRequest.getJsonMapFromUrl(url);
             if( map!=null && map.get("symbol") == null && map.get("Symbol") == null) {
                 map = null;
@@ -383,13 +388,7 @@ public class AlphavantageHandler implements ImportHandler {
                     auditService.saveMessage("no content from url " + url + " after "+retryCount+" tries", Severity.ERROR, AUDIT_MSG_TYPE);
                 } else {   
                     auditService.saveMessage("no content from url" + url + " retry "+retryCount, Severity.WARN, AUDIT_MSG_TYPE); 
-                    try {
-                        Thread.sleep(SLEEPTIMEBEFORERETRY); 
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
                 }
-                
             } 
         }
         return map;
