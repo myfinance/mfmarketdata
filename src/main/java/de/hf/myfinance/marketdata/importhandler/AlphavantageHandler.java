@@ -378,6 +378,9 @@ public class AlphavantageHandler implements ImportHandler {
             }
             retryCount++;
             map = webRequest.getJsonMapFromUrl(url);
+            if(map==null || map.isEmpty()){
+                auditService.saveMessage("no content from url " + url, Severity.WARN, AUDIT_MSG_TYPE);
+            }
         }
         return map;
     }
