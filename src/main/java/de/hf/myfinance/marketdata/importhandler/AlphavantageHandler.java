@@ -380,6 +380,10 @@ public class AlphavantageHandler implements ImportHandler {
             map = webRequest.getJsonMapFromUrl(url);
             if(map==null || map.isEmpty()){
                 auditService.saveMessage("no content from url " + url, Severity.WARN, AUDIT_MSG_TYPE);
+            } else if( map.get("symbol") == null) {
+                auditService.saveMessage("no symbol in content from url " + url, Severity.WARN, AUDIT_MSG_TYPE);
+                map = null;
+                
             }
         }
         return map;
