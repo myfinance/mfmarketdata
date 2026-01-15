@@ -474,6 +474,11 @@ public class AlphavantageHandler implements ImportHandler {
     private SecurityMetrics setCurrency(String symbol, SecurityMetrics securityMetrics,
             Map<String, String> latestAnnualReport) {
         var returnvalue = securityMetrics;
+        var currencyFromReport = latestAnnualReport.get("reportedCurrency");
+        if(currencyFromReport==null || currencyFromReport.isEmpty()|| currencyFromReport.toLowerCase().equals("none")){
+            auditService.saveMessage("No reportedCurrency in report for " + symbol, Severity.INFO, AUDIT_MSG_TYPE);
+            return returnvalue;
+        }
         if (returnvalue.getCurrencyCode() == null || returnvalue.getCurrencyCode().isEmpty()) {
             returnvalue.setCurrencyCode(latestAnnualReport.get("reportedCurrency"));
         } else if (!returnvalue.getCurrencyCode().equals(latestAnnualReport.get("reportedCurrency"))) {
