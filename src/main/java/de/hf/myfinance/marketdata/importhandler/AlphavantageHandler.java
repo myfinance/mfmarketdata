@@ -28,6 +28,9 @@ public class AlphavantageHandler implements ImportHandler {
     WebRequest webRequest;
     AuditService auditService;
 
+    public final static int MAXRETRYCOUNT = 3;
+    public final static int SLEEPTIMEBEFORERETRY = 5000; // in milliseconds
+
     public final static String ALPHAVANTAGE_API_KEY = "Q6RLS6PGB55105EP"; // Replace with your actual API key
     public final static String URLPREFIX = "https://www.alphavantage.co/query?function=";
     public final static String SYMBOL_PREFIX = "&symbol=";
@@ -368,23 +371,26 @@ public class AlphavantageHandler implements ImportHandler {
     private Map<String, Object> loadData(String url) {
         Map<String, Object> map = null;
         var retryCount = 0;
-        while(map==null && retryCount<3){
-            if(retryCount>0 ){
-                try {
-                    Thread.sleep(5000 * retryCount); // Exponential backoff
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-            retryCount++;
+        while(map==null && retryCount<MAXRETRYCOUNT){
+
             map = webRequest.getJsonMapFromUrl(url);
-            if(map==null || map.isEmpty()){
-                auditService.saveMessage("no content from url " + url, Severity.WARN, AUDIT_MSG_TYPE);
-            } else if( map.get("symbol") == null && map.get("Symbol") == null) {
-                auditService.saveMessage("no symbol in content from url " + url, Severity.WARN, AUDIT_MSG_TYPE);
+            if( map!=null && map.get("symbol") == null && map.get("Symbol") == null) {
                 map = null;
-                
             }
+            if(map==null || map.isEmpty()){
+                retryCount++;
+                if(retryCount>=MAXRETRYCOUNT ){
+                    auditService.saveMessage("no content from url " + url + " after "+retryCount+" tries", Severity.ERROR, AUDIT_MSG_TYPE);
+                } else {   
+                    auditService.saveMessage("no content from url" + url + " retry "+retryCount, Severity.WARN, AUDIT_MSG_TYPE); 
+                    try {
+                        Thread.sleep(SLEEPTIMEBEFORERETRY); 
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                
+            } 
         }
         return map;
     }
