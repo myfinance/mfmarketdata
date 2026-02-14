@@ -1,4 +1,9 @@
 server.port: 30033
+server.host: localhost
+env:
+  #host: 192.168.100.73
+  # in case you want to run rabbitMq and keycloak on a dev server and not on your local machine like the software componentens(MFcomposite, mfinstrument...)
+  host: ${server.host}
 logging:
   level:
     root: INFO
@@ -74,13 +79,13 @@ spring.cloud.stream.bindings.loadNewMarketDataProcessor-in-0.consumer:
 
 
 spring.rabbitmq:
-  host: 192.168.100.73
+  host: ${env.host}
   port: 30021
   username: user
   password: vulkan
 
 spring.data.mongodb:
-  host: 192.168.100.73
+  host: ${env.host}
   port: 30023
   database: marketdata-db
   authentication-database: admin
